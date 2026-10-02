@@ -1,5 +1,4 @@
 import './style.css';
-import { Vector3 } from 'three';
 import { BRAND, FLAVORS } from './flavors.js';
 import { flavorState, currentFlavor } from './scrollState.js';
 import { loadLabelFonts } from './labels.js';
@@ -7,7 +6,6 @@ import { createScene } from './scene.js';
 import { createCan } from './can.js';
 import { createState, initScroll, POSES } from './scroll.js';
 import { initCursor } from './cursor.js';
-import { createFizz } from './sfx.js';
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const mobile = matchMedia('(max-width: 768px), (pointer: coarse)').matches;
@@ -24,7 +22,6 @@ const ui = {
   dots: [...document.querySelectorAll('.dots button')],
   bgA: document.querySelector('.bg-a'),
   bgB: document.querySelector('.bg-b'),
-  sound: document.querySelector('.sound'),
 };
 
 function hasWebGL() {
@@ -54,7 +51,6 @@ function paintBackground(section, fs) {
 }
 
 const state = createState(mobile);
-const fizz = createFizz();
 let lastFlavor = -1;
 
 function tickUI() {
@@ -70,18 +66,12 @@ function tickUI() {
 
 function bindControls(scroll) {
   ui.dots.forEach((d, i) => d.addEventListener('click', () => scroll.goToFlavor(i, FLAVORS.length)));
-  ui.sound.addEventListener('click', () => {
-    const on = fizz.toggle();
-    ui.sound.setAttribute('aria-pressed', String(on));
-    ui.sound.textContent = on ? 'Som: on' : 'Som: off';
-    if (on) scroll.replayOpen();
-  });
 }
 
 async function start() {
   if (!hasWebGL()) {
     root.classList.add('no-webgl');
-    bindControls(initScroll({ state, mobile, reducedMotion: reduced, onOpen: () => fizz.play() }));
+    bindControls(initScroll({ state, mobile, reducedMotion: reduced }));
     (function loop() { tickUI(); requestAnimationFrame(loop); })();
     return;
   }
@@ -98,14 +88,7 @@ async function start() {
     return c;
   });
 
-  const onOpen = () => {
-    fizz.play();
-    if (reduced) return;
-    const top = new Vector3().copy(hero.group.position);
-    top.y += 1.7 * hero.group.scale.y;
-    s3.burst(top, ['#ffffff', '#F4F1EA'], { up: true });
-  };
-  bindControls(initScroll({ state, mobile, reducedMotion: reduced, onOpen }));
+  bindControls(initScroll({ state, mobile, reducedMotion: reduced }));
 
   const cursor = initCursor();
   const pointer = { x: 0, y: 0 };
@@ -127,10 +110,7 @@ async function start() {
     g.rotation.set(0.12 + pointer.y * 0.12 * idle, spin - 0.4 + pointer.x * 0.25 * idle, -0.14);
     hero.setOpen(state.open);
 
-    if (changed) {
-      cursor.setColor(FLAVORS[cur].a);
-      if (!reduced && state.section === 'sabores') s3.burst(g.position, [FLAVORS[cur].a, FLAVORS[cur].b]);
-    }
+    if (changed) cursor.setColor(FLAVORS[cur].a);
 
     const ctaOn = reduced ? (state.section === 'cta' ? 1 : 0) : state.cta;
     extras.forEach((c, i) => {
@@ -142,7 +122,7 @@ async function start() {
     });
 
     hero.update(dt, t);
-    s3.render(dt);
+    s3.render();
   });
 }
 

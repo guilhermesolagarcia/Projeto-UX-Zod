@@ -14,5 +14,5 @@ const can = createCan({ condensation: q.get('drops') !== '0' });
 s.scene.add(can.group);
 can.setFlavors(+(q.get('from') ?? 0), +(q.get('to') ?? 1), +(q.get('mix') ?? 0));
 can.group.rotation.y = +(q.get('rot') ?? 0);
-s.renderer.setAnimationLoop((now) => { can.update(1 / 60, now / 1000); s.render(1 / 60); document.title = 'ready'; });
+s.renderer.setAnimationLoop((now) => { can.update(1 / 60, now / 1000); s.render(); document.title = 'ready'; });
 </script></body></html>

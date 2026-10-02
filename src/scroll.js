@@ -13,7 +13,7 @@ export function createState(mobile) {
   return { ...POSES[mobile ? 'mobile' : 'desktop'].hero, drop: 0, open: 0, flavorP: 0, cta: 0, section: 'hero' };
 }
 
-export function initScroll({ state, mobile, reducedMotion, onOpen }) {
+export function initScroll({ state, mobile, reducedMotion }) {
   const poses = POSES[mobile ? 'mobile' : 'desktop'];
   const smoother = reducedMotion ? null : ScrollSmoother.create({ wrapper: '#smooth-wrapper', content: '#smooth-content', smooth: 1.1 });
   const scrollTo = (y) => (smoother ? smoother.scrollTo(y, true) : window.scrollTo({ top: y, behavior: 'auto' }));
@@ -30,7 +30,7 @@ export function initScroll({ state, mobile, reducedMotion, onOpen }) {
     gsap.timeline({ delay: 0.2 })
       .to(state, { drop: 0, duration: 1.3, ease: 'bounce.out' })
       .from('.hero .w > span', { yPercent: 110, duration: 0.8, stagger: 0.08, ease: 'power3.out' }, 0.3)
-      .to(state, { open: 1, duration: 0.25, ease: 'back.out(3)', onStart: onOpen }, '+=0.15');
+      .to(state, { open: 1, duration: 0.25, ease: 'back.out(3)' }, '+=0.15');
 
     // hero → sabores: a lata vai pro centro
     gsap.to(state, { ...poses.sabores, ease: 'none', scrollTrigger: { trigger: '#sabores', start: 'top bottom', end: 'top top', scrub: true } });
@@ -61,10 +61,5 @@ export function initScroll({ state, mobile, reducedMotion, onOpen }) {
     scrollTo(flavors.start + (flavors.end - flavors.start) * (i / (count - 1)));
   }
 
-  function replayOpen() {
-    if (reducedMotion) { onOpen(); return; }
-    gsap.fromTo(state, { open: 0 }, { open: 1, duration: 0.3, delay: 0.1, ease: 'back.out(3)', onStart: onOpen });
-  }
-
-  return { goToFlavor, replayOpen };
+  return { goToFlavor };
 }
