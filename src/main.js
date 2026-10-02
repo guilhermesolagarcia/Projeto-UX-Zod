@@ -121,7 +121,7 @@ async function start() {
     const ctaOn = reduced ? (state.section === 'cta' ? 1 : 0) : state.cta;
     // giro lento no CTA acumulado por frame (t * ctaOn giraria rápido durante o scrub); fora dele volta pra frente
     ctaSpin = ctaOn > 0.01 ? ctaSpin + dt * 0.6 * ctaOn * idle : ctaSpin + (Math.round(ctaSpin / TAU) * TAU - ctaSpin) * Math.min(dt * 4, 1);
-    g.rotation.set(0.12 + pointer.y * 0.12 * idle, spin - 0.4 + pointer.x * 0.25 * idle + ctaSpin, -0.14);
+    g.rotation.set(0.12 + pointer.y * 0.12 * idle, spin - 0.15 + state.turn + pointer.x * 0.25 * idle + ctaSpin, -0.14);
     hero.setOpen(state.open);
 
     if (changed) cursor.setColor(FLAVORS[cur].a);
