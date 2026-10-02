@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { flavorState, currentFlavor, presentationSpin, ctaSlots } from '../src/scrollState.js';
+import { flavorState, currentFlavor, presentationSpin, ctaSlots, labelLocal } from '../src/scrollState.js';
 
 test('começo da seção mostra o primeiro sabor parado', () => {
   assert.deepEqual(flavorState(0, 4), { from: 0, to: 1, mix: 0 });
@@ -65,4 +65,16 @@ test('CTA chegando pelo scroll: fileira 0,1,2 e Grape na lata principal', () => 
 test('CTA com outro sabor atual: ele vai pra lata principal e os outros seguem em ordem', () => {
   assert.deepEqual(ctaSlots(1, 4), [0, 2, 3, 1]);
   assert.deepEqual(ctaSlots(0, 4), [1, 2, 3, 0]);
+});
+
+test('labelLocal: u=0 fica em +z, u=0,25 em +x, u=0,5 em −z (raio 0,66)', () => {
+  const p0 = labelLocal(0, 0), p1 = labelLocal(0.25, 0), p2 = labelLocal(0.5, 0);
+  close(p0.x, 0); close(p0.z, 0.66);
+  close(p1.x, 0.66); close(p1.z, 0);
+  close(p2.x, 0); close(p2.z, -0.66);
+});
+
+test('labelLocal: v=0 na base do corpo (−1,55), v=1 no topo (1,35)', () => {
+  close(labelLocal(0.3, 0).y, -1.55);
+  close(labelLocal(0.3, 1).y, 1.35);
 });

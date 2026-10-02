@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
 import { drawLabelMaps, LACRE } from './labels.js';
+import { labelLocal } from './scrollState.js';
 
 const V = (x, y) => new THREE.Vector2(x, y);
 const BODY = [V(0.66, -1.55), V(0.66, 1.35)];
@@ -136,6 +137,14 @@ metalnessFactor *= mix(texture2D(metalnessMap, vMetalnessMapUv), texture2D(metal
     if (drops) drops.offset.y -= dt * 0.01;
   }
 
+  // UV do rótulo → ponto de mundo; com `normal`, também a normal de mundo (pra saber se está de costas pra câmera)
+  function labelPoint(u, v, target, normal) {
+    const p = labelLocal(u, v);
+    inner.updateWorldMatrix(true, false);
+    if (normal) normal.set(p.x, 0, p.z).transformDirection(inner.matrixWorld);
+    return inner.localToWorld(target.set(p.x, p.y, p.z));
+  }
+
   setFlavors(0, 1, 0);
-  return { group, setFlavors, setOpen, update };
+  return { group, setFlavors, setOpen, update, labelPoint };
 }

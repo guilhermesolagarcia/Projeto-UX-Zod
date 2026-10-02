@@ -26,3 +26,9 @@ export function ctaSlots(cur, count) {
   for (let k = 0; k < count; k++) if (k !== cur) slots.push(k);
   return [...slots, cur];
 }
+
+// UV do rótulo → ponto local no corpo da lata (LatheGeometry: phi = u·2π, x = sin·r, z = cos·r, v=0 na base, v=1 no topo)
+export function labelLocal(u, v) {
+  const phi = u * Math.PI * 2;
+  return { x: Math.sin(phi) * 0.66, y: -1.55 + v * 2.9, z: Math.cos(phi) * 0.66 };
+}
