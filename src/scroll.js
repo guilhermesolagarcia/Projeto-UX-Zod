@@ -16,7 +16,7 @@ export const currentPoses = () => POSES[narrow.matches ? 'mobile' : 'desktop'];
 const TAIL = 0.15; // fim do pin em que o último sabor fica parado antes da página seguir
 
 export function createState() {
-  return { ...currentPoses().hero, drop: 0, open: 0, flavorP: 0, cta: 0, section: 'hero' };
+  return { ...currentPoses().hero, drop: 0, open: 0, flavorP: 0, cta: 0, vel: 0, section: 'hero' };
 }
 
 export function initScroll({ state, reducedMotion }) {
@@ -32,6 +32,9 @@ export function initScroll({ state, reducedMotion }) {
   }
 
   if (!reducedMotion) {
+    // velocidade da rolagem normalizada (-1..1); main.js faz decair a 0 quando a rolagem para
+    ScrollTrigger.create({ onUpdate: (self) => { state.vel = gsap.utils.clamp(-1, 1, self.getVelocity() / 2500); } });
+
     // abertura: a lata cai quicando, o título sobe palavra por palavra e o lacre abre
     state.drop = 1;
     gsap.timeline({ delay: 0.2 })

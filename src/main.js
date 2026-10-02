@@ -1,4 +1,5 @@
 import './style.css';
+import { Color } from 'three';
 import { BRAND, FLAVORS } from './flavors.js';
 import { flavorState, currentFlavor, presentationSpin } from './scrollState.js';
 import { loadLabelFonts } from './labels.js';
@@ -11,6 +12,7 @@ const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const mobile = matchMedia('(max-width: 768px), (pointer: coarse)').matches; // só pra qualidade do renderer
 const root = document.documentElement;
 const SECTION_BG = { hero: FLAVORS[0].a, ingredientes: '#F4F1EA', cta: '#111111' };
+const RIM_A = FLAVORS.map((f) => new Color(f.a)), RIM_B = FLAVORS.map((f) => new Color(f.b)), WHITE = new Color('#fff'), rimMix = new Color();
 
 document.querySelectorAll('[data-brand]').forEach((el) => { el.textContent = BRAND; });
 
@@ -105,7 +107,7 @@ async function start() {
   if (!reduced) addEventListener('pointermove', (e) => { pointer.x = (e.clientX / innerWidth) * 2 - 1; pointer.y = (e.clientY / innerHeight) * 2 - 1; });
 
   const TAU = Math.PI * 2;
-  let prev = performance.now(), ctaSpin = 0;
+  let prev = performance.now(), ctaSpin = 0, tilt = 0, tiltV = 0;
   s3.renderer.setAnimationLoop((now) => {
     const dt = Math.min((now - prev) / 1000, 0.05); prev = now;
     const t = now / 1000;
@@ -121,10 +123,15 @@ async function start() {
     const ctaOn = reduced ? (state.section === 'cta' ? 1 : 0) : state.cta;
     // giro lento no CTA acumulado por frame (t * ctaOn giraria rápido durante o scrub); fora dele volta pra frente
     ctaSpin = ctaOn > 0.01 ? ctaSpin + dt * 0.6 * ctaOn * idle : ctaSpin + (Math.round(ctaSpin / TAU) * TAU - ctaSpin) * Math.min(dt * 4, 1);
-    g.rotation.set(0.12 + pointer.y * 0.12 * idle, spin - 0.15 + state.turn + pointer.x * 0.25 * idle + ctaSpin, -0.14);
+    // mola: a lata inclina com a velocidade da rolagem e volta balançando quando para
+    if (!reduced) { state.vel *= 0.9; tiltV += ((state.vel * 0.35 - tilt) * 90 - tiltV * 12) * dt; tilt += tiltV * dt; }
+    g.rotation.set(0.12 + pointer.y * 0.12 * idle + tilt, spin - 0.15 + state.turn + pointer.x * 0.25 * idle + ctaSpin, -0.14 + tilt * 0.3);
     hero.setOpen(state.open);
 
     if (changed) cursor.setColor(FLAVORS[cur].a);
+    const sec = state.section;
+    const rimColor = sec === 'sabores' ? rimMix.lerpColors(RIM_B[fs.from], RIM_B[fs.to], fs.mix) : sec === 'ingredientes' ? WHITE : sec === 'cta' ? RIM_A[cur] : RIM_B[0];
+    s3.setRim(rimColor, sec === 'ingredientes' ? 3 : 4, reduced ? 1 : 0.08);
 
     const poses = currentPoses();
     extras.forEach((c, i) => {

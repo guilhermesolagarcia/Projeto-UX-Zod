@@ -13,6 +13,13 @@ export function createScene(canvas, { mobile }) {
   camera.position.set(0, 0, 10);
   const key = new THREE.DirectionalLight('#fff', 2.2); key.position.set(4, 5, 5); scene.add(key);
   const rim = new THREE.DirectionalLight('#fff', 3); rim.position.set(-5, 2, -4); scene.add(rim);
+  const rim2 = new THREE.DirectionalLight('#fff', 1.5); rim2.position.set(5, 1, -4); scene.add(rim2);
+
+  // luz de recorte dos dois lados tingida pela cor do sabor; k = 1 troca direto
+  function setRim(color, intensity, k = 0.08) {
+    rim.color.lerp(color, k); rim.intensity += (intensity - rim.intensity) * k;
+    rim2.color.copy(rim.color); rim2.intensity = rim.intensity * 0.5;
+  }
 
   function viewSize() {
     const h = 2 * camera.position.z * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
@@ -30,5 +37,5 @@ export function createScene(canvas, { mobile }) {
 
   const render = () => renderer.render(scene, camera);
 
-  return { renderer, scene, camera, viewSize, render };
+  return { renderer, scene, camera, viewSize, render, setRim };
 }
