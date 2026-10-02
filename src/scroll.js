@@ -5,7 +5,7 @@ import { ScrollSmoother } from 'gsap/ScrollSmoother';
 gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
 
 // turn: giro extra da lata; no ingredientes mostra o verso (tabela nutricional), no CTA volta pra frente
-const BACK = 2.26; // ângulo em que a tabela (u ≈ 0,14 do rótulo) fica de frente pra câmera
+export const BACK = 2.26; // ângulo em que a tabela (u ≈ 0,14 do rótulo) fica de frente pra câmera
 export const POSES = {
   desktop: { hero: { x: 0.42, y: -0.08, s: 0.85, turn: 0 }, sabores: { x: 0.28, y: 0.02, s: 1, turn: 0 }, ingredientes: { x: 0.62, y: 0, s: 1.1, turn: BACK }, cta: { x: 0.54, y: -0.48, s: 0.4, turn: Math.PI * 2 }, slots: [-0.54, -0.18, 0.18] },
   mobile: { hero: { x: 0.1, y: -0.42, s: 0.6, turn: 0 }, sabores: { x: 0, y: 0.25, s: 0.75, turn: 0 }, ingredientes: { x: 0.78, y: 0.68, s: 0.18, turn: BACK }, cta: { x: 0.66, y: -0.5, s: 0.24, turn: Math.PI * 2 }, slots: [-0.66, -0.22, 0.22] },
@@ -16,7 +16,7 @@ export const currentPoses = () => POSES[narrow.matches ? 'mobile' : 'desktop'];
 const TAIL = 0.15; // fim do pin em que o último sabor fica parado antes da página seguir
 
 export function createState() {
-  return { ...currentPoses().hero, drop: 0, open: 0, flavorP: 0, cta: 0, vel: 0, section: 'hero' };
+  return { ...currentPoses().hero, drop: 0, open: 0, flavorP: 0, cta: 0, vel: 0, section: 'hero', lines: [{ p: 1 }, { p: 1 }, { p: 1 }] };
 }
 
 export function initScroll({ state, reducedMotion }) {
@@ -54,12 +54,9 @@ export function initScroll({ state, reducedMotion }) {
       gsap.fromTo(state, { ...p.ingredientes, cta: 0 }, { ...p.cta, cta: 1, ease: 'none', immediateRender: false, scrollTrigger: scrub('#cta', 'top bottom', 'top top') });
     });
 
-    gsap.from('.card', { y: 60, opacity: 0, stagger: 0.12, duration: 0.8, ease: 'power3.out', scrollTrigger: { trigger: '.cards', start: 'top 75%' } });
-    document.querySelectorAll('[data-count]').forEach((el) => {
-      const end = Number(el.dataset.count), o = { v: 0 };
-      el.textContent = '0';
-      gsap.to(o, { v: end, duration: 1.4, ease: 'power2.out', scrollTrigger: { trigger: el, start: 'top 80%' }, onUpdate: () => { el.textContent = String(Math.round(o.v)); } });
-    });
+    gsap.from('.card', { y: 40, opacity: 0, stagger: 0.15, duration: 0.8, ease: 'power3.out', scrollTrigger: { trigger: '.cards', start: 'top 75%' } });
+    // linhas card → tabela: esperam a lata terminar de virar (pose em "top 20%") e se desenham na ordem dos cards
+    gsap.fromTo(state.lines, { p: 0 }, { p: 1, stagger: 0.15, duration: 0.6, ease: 'power2.out', scrollTrigger: { trigger: '#ingredientes', start: 'top 20%' } });
   }
 
   // links internos (#sabores, #cta…) usam a rolagem suave

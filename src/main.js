@@ -6,7 +6,7 @@ import { flavorState, currentFlavor, presentationSpin, ctaSlots } from './scroll
 import { loadLabelFonts, LACRE } from './labels.js';
 import { createScene } from './scene.js';
 import { createCan, preloadLabels } from './can.js';
-import { createState, initScroll, currentPoses } from './scroll.js';
+import { createState, initScroll, currentPoses, BACK } from './scroll.js';
 import { initCursor } from './cursor.js';
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -149,6 +149,14 @@ async function start() {
   });
   addEventListener('click', (e) => { if (canHover >= 0 && !e.target.closest('a, button')) pick(canHover); });
 
+  // linhas card → item da tabela no verso da lata (só desktop). Alvos em UV do rótulo (labels.js backInfo, 2048×1432):
+  // logo antes do texto da linha (x 120, as linhas chegam pela esquerda) e no meio da altura da letra (baseline − 7)
+  const wide = matchMedia('(min-width: 769px)');
+  const lead = document.querySelector('.leaders'), leadG = [...lead.children], cards = [...document.querySelectorAll('.card')];
+  const ROWS = [696, 552, 768].map((y) => [120 / 2048, 1 - (y - 7) / 1432]); // Cafeína, Açúcares totais, Vitamina B12
+  const lp = new Vector3(), ln = new Vector3(), eye = new Vector3();
+  let leadOp = 0;
+
   const TAU = Math.PI * 2;
   let prev = performance.now(), ctaSpin = 0, tilt = 0, tiltV = 0;
   s3.renderer.setAnimationLoop((now) => {
@@ -212,6 +220,27 @@ async function start() {
       ui.labels[k].style.transform = `translate(${((base.x + 1) / 2) * innerWidth}px, ${((1 - base.y) / 2) * innerHeight}px) translate(-50%, 6px)`;
       ui.labels[k].classList.toggle('is-hot', hot === k);
     });
+
+    // linhas: aparecem com a lata virada no ingredientes e somem (fade) fora dele
+    leadOp += ((wide.matches && sec === 'ingredientes' && Math.abs(state.turn - BACK) < 0.12 ? 1 : 0) - leadOp) * (reduced ? 1 : Math.min(dt * 6, 1));
+    paint('leadOp', leadOp > 0.01 ? leadOp.toFixed(2) : '0', (v) => { lead.style.opacity = v; });
+    if (leadOp > 0.01) {
+      const r = cards.map((c) => c.getBoundingClientRect());
+      ROWS.forEach(([u, v], i) => {
+        hero.labelPoint(u, v, lp, ln);
+        const back = ln.dot(eye.copy(s3.camera.position).sub(lp)) <= 0;
+        lp.project(s3.camera);
+        const x = ((lp.x + 1) / 2) * innerWidth, y = ((1 - lp.y) / 2) * innerHeight;
+        // o 160 (coluna esquerda) passa pelo vão entre os cards da direita; os outros saem da borda direita do próprio card
+        const gy = (r[1].bottom + r[2].top) / 2;
+        const from = i === 0 ? `${r[0].right},${gy} ${r[1].right},${gy}` : `${r[i].right},${Math.min(Math.max(y, r[i].top + 20), r[i].bottom - 20)}`;
+        const [line, dot] = leadG[i].children, p = state.lines[i].p;
+        leadG[i].style.visibility = back ? 'hidden' : '';
+        line.setAttribute('points', `${from} ${x},${y}`);
+        line.style.strokeDashoffset = 1 - p;
+        dot.setAttribute('cx', x); dot.setAttribute('cy', y); dot.style.opacity = Math.max(0, (p - 0.85) / 0.15);
+      });
+    }
 
     hero.update(dt, t);
     s3.render();

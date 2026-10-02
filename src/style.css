@@ -20,6 +20,9 @@ body { font-family: var(--font-body); color: var(--ink); -webkit-font-smoothing:
 .bg-wave { position: absolute; left: 0; top: -39px; width: 100%; height: 40px; fill: currentColor; }
 #scene { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 1; pointer-events: none; }
 .fallback-can { display: none; }
+.leaders { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; opacity: 0; } /* depois do canvas: por cima da lata, embaixo do conteúdo */
+.leaders polyline { fill: none; stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 1 1; }
+.leaders circle { fill: var(--ink); }
 #smooth-wrapper { position: relative; z-index: 2; }
 
 .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px clamp(16px, 4vw, 48px); font-weight: 600; color: var(--ink); transition: color .4s; }
@@ -64,13 +67,16 @@ main { overflow-x: clip; } /* a faixa inclinada passa da largura da tela */
 .ingredientes { display: flex; flex-direction: column; justify-content: center; }
 .section-title { max-width: 60%; font-family: var(--font-display); font-weight: 900; font-size: clamp(32px, 4vw, 56px); letter-spacing: -0.03em; }
 .cards { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 18px; max-width: min(820px, 56vw); margin-top: 40px; }
-.card { background: #fff; border-radius: 20px; padding: 26px; }
-.card:first-child { grid-row: span 2; display: flex; flex-direction: column; justify-content: flex-end; padding: 34px; }
-.card:first-child .num { font-size: clamp(88px, 8.5vw, 128px); }
+.card { border-radius: 20px; padding: 26px; }
+.card:first-child { grid-row: span 2; display: flex; flex-direction: column; justify-content: flex-end; padding: 34px; background: var(--ink); color: var(--creme); }
+.card:first-child .num { font-size: clamp(88px, 8.5vw, 128px); color: var(--flavor); }
+/* 0g: verde da Lime com a onda + filete creme do rótulo na metade de baixo; B12: lilás da Grape */
+.card:nth-child(2) { background: #B6F500 url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 100' preserveAspectRatio='none'><path d='M0 34 Q50 14 100 34 T200 34 T300 34 T400 34 V100 H0Z' fill='%239BD600'/><path d='M0 24 Q50 4 100 24 T200 24 T300 24 T400 24' fill='none' stroke='%23F4F1EA' stroke-width='5' vector-effect='non-scaling-stroke'/></svg>") bottom / 100% 50% no-repeat; }
+.card:nth-child(3) { background: #A57CFF; }
 .num { font-size: clamp(44px, 5vw, 64px); }
 .num small { margin-left: 4px; font-size: .4em; }
 .card h3 { margin-top: 10px; font-size: 19px; font-weight: 800; }
-.card p:last-child { margin-top: 6px; font-size: 15px; line-height: 1.45; opacity: .75; }
+.card p:last-child { margin-top: 6px; font-size: 15px; line-height: 1.45; opacity: .85; } /* .85: AA (≥ 5:1) até no lilás */
 
 .cta { display: flex; flex-direction: column; justify-content: flex-start; align-items: flex-start; padding-top: clamp(110px, 18dvh, 200px); color: var(--creme); }
 .cta h2 { font-size: clamp(48px, 7.5vw, 112px); }
