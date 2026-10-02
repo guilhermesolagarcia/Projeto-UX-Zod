@@ -107,6 +107,10 @@ main { overflow-x: clip; } /* a faixa inclinada passa da largura da tela */
   .dots { top: auto; bottom: 64px; right: 16px; transform: none; flex-direction: row; }
   .no-webgl .fallback-can { top: auto; bottom: 4vh; right: 50%; height: 42vh; transform: translateX(50%); }
 }
+/* latas do CTA a 22vw umas das outras: rótulo 20vw com fonte menor pra "Watermelon" caber e os vizinhos não encostarem */
+@media (max-width: 400px) {
+  .can-label { max-width: 20vw; padding: 6px 2px; font-size: clamp(10.5px, 3.2vw, 14px); }
+}
 @media (prefers-reduced-motion: reduce) {
   .bg-a, .bg-word, .btn, .nav, .dots button, .can-label { transition: none; }
   .marquee-track { animation: none; }
