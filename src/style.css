@@ -14,6 +14,9 @@ body { font-family: var(--font-body); color: var(--ink); -webkit-font-smoothing:
 .bg-a { background-color: #FFB800; transition: background-color .6s ease; }
 [data-section="sabores"] .bg-a { transition: none; }
 .bg-b { transform: translateY(105%); }
+.bg-word { position: absolute; inset: 0; display: grid; place-items: center; opacity: 0; transition: opacity .4s; }
+[data-section="sabores"] .bg-word { opacity: 1; }
+.bg-word span { grid-area: 1 / 1; font-family: var(--font-display); font-weight: 900; letter-spacing: -0.035em; line-height: 1; white-space: nowrap; }
 .bg-wave { position: absolute; left: 0; top: -39px; width: 100%; height: 40px; fill: currentColor; }
 #scene { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 1; pointer-events: none; }
 .fallback-can { display: none; }
@@ -45,7 +48,7 @@ body { font-family: var(--font-body); color: var(--ink); -webkit-font-smoothing:
 .sabores { height: 100vh; height: 100dvh; }
 .flavor-info { position: absolute; left: clamp(16px, 6vw, 96px); bottom: 64px; max-width: 420px; }
 .eyebrow { font-weight: 800; font-size: 14px; letter-spacing: .12em; text-transform: uppercase; }
-.flavor-name { margin-top: 10px; font-size: clamp(40px, 6vw, 88px); }
+.flavor-name { margin-top: 10px; font-size: clamp(28px, 3vw, 44px); }
 .flavor-desc { margin-top: 14px; font-size: 18px; line-height: 1.45; }
 .dots { position: absolute; right: clamp(16px, 4vw, 48px); top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 12px; }
 .dots button { width: 14px; height: 14px; padding: 0; border-radius: 50%; border: 2px solid var(--ink); background: transparent; cursor: pointer; transition: transform .2s, background .2s; }
@@ -81,9 +84,10 @@ body { font-family: var(--font-body); color: var(--ink); -webkit-font-smoothing:
   .cards { grid-template-columns: 1fr; max-width: none; }
   .card:first-child { grid-row: auto; }
   .flavor-info { right: 16px; bottom: 100px; }
+  .bg-word { bottom: 25%; }
   .dots { top: auto; bottom: 64px; right: 16px; transform: none; flex-direction: row; }
   .no-webgl .fallback-can { top: auto; bottom: 4vh; right: 50%; height: 42vh; transform: translateX(50%); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .bg-a, .btn, .nav, .dots button { transition: none; }
+  .bg-a, .bg-word, .btn, .nav, .dots button { transition: none; }
 }

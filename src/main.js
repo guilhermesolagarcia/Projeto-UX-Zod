@@ -1,5 +1,6 @@
 import './style.css';
 import { Color } from 'three';
+import { gsap } from 'gsap';
 import { BRAND, FLAVORS } from './flavors.js';
 import { flavorState, currentFlavor, presentationSpin } from './scrollState.js';
 import { loadLabelFonts } from './labels.js';
@@ -23,6 +24,7 @@ const ui = {
   dots: [...document.querySelectorAll('.dots button')],
   bgA: document.querySelector('.bg-a'),
   bgB: document.querySelector('.bg-b'),
+  words: [...document.querySelectorAll('.bg-word span')],
 };
 
 function hasWebGL() {
@@ -33,6 +35,23 @@ function hasWebGL() {
   } catch { return false; }
 }
 
+// nome gigante atrás da lata: ocupa ~92vw (limitado pela altura), recalculado no resize e quando a fonte carrega
+let wordK = 0;
+function fitWord(el = ui.words[wordK]) {
+  el.style.fontSize = '100px';
+  el.style.fontSize = `${Math.min((100 * innerWidth * 0.92) / el.offsetWidth, innerHeight * 0.42)}px`;
+}
+addEventListener('resize', () => fitWord());
+document.fonts.load('900 100px Unbounded').then(() => fitWord(), () => {});
+
+function showWord(f) {
+  const old = ui.words[wordK], el = ui.words[(wordK ^= 1)];
+  el.textContent = f.l1; el.style.color = f.b; fitWord(el);
+  if (reduced) { gsap.set(old, { opacity: 0 }); gsap.set(el, { opacity: 1 }); return; }
+  gsap.to(old, { yPercent: -110, opacity: 0, duration: 0.7, ease: 'power3.inOut', overwrite: true });
+  gsap.fromTo(el, { yPercent: 110, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.7, ease: 'power3.out', overwrite: true });
+}
+
 function showFlavor(i) {
   const f = FLAVORS[i];
   ui.name.textContent = f.title;
@@ -40,6 +59,7 @@ function showFlavor(i) {
   ui.num.textContent = String(i + 1);
   ui.dots.forEach((d, k) => d.setAttribute('aria-current', k === i ? 'true' : 'false'));
   root.style.setProperty('--flavor', f.a);
+  showWord(f);
   if (!reduced) ui.name.animate([{ opacity: 0, transform: 'translateY(24px)' }, { opacity: 1, transform: 'none' }], { duration: 450, easing: 'cubic-bezier(.2,.8,.2,1)' });
 }
 
