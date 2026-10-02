@@ -70,8 +70,8 @@ main { overflow-x: clip; } /* a faixa inclinada passa da largura da tela */
 .card { border-radius: 20px; padding: 26px; }
 .card:first-child { grid-row: span 2; display: flex; flex-direction: column; justify-content: flex-end; padding: 34px; background: var(--ink); color: var(--creme); }
 .card:first-child .num { font-size: clamp(88px, 8.5vw, 128px); color: var(--flavor); }
-/* 0g: verde da Lime com a onda + filete creme do rótulo na metade de baixo; B12: lilás da Grape */
-.card:nth-child(2) { background: #B6F500 url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 100' preserveAspectRatio='none'><path d='M0 34 Q50 14 100 34 T200 34 T300 34 T400 34 V100 H0Z' fill='%239BD600'/><path d='M0 24 Q50 4 100 24 T200 24 T300 24 T400 24' fill='none' stroke='%23F4F1EA' stroke-width='5' vector-effect='non-scaling-stroke'/></svg>") bottom / 100% 50% no-repeat; }
+/* 0g: verde da Lime com a onda + filete creme do rótulo numa faixa de 60px embaixo, abaixo do texto (padding 80); B12: lilás da Grape */
+.card:nth-child(2) { padding-bottom: 80px; background: #B6F500 url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 60' preserveAspectRatio='none'><path d='M0 24 Q50 14 100 24 T200 24 T300 24 T400 24 V60 H0Z' fill='%239BD600'/><path d='M0 14 Q50 4 100 14 T200 14 T300 14 T400 14' fill='none' stroke='%23F4F1EA' stroke-width='5' vector-effect='non-scaling-stroke'/></svg>") bottom / 100% 60px no-repeat; }
 .card:nth-child(3) { background: #A57CFF; }
 .num { font-size: clamp(44px, 5vw, 64px); }
 .num small { margin-left: 4px; font-size: .4em; }
