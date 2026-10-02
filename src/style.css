@@ -33,7 +33,7 @@ body { font-family: var(--font-body); color: var(--ink); -webkit-font-smoothing:
 [data-section="cta"] .pill { background: var(--creme); color: var(--ink); }
 
 .display { font-family: var(--font-display); font-weight: 900; letter-spacing: -0.035em; line-height: .9; }
-.section { position: relative; min-height: 100vh; padding: 120px clamp(16px, 6vw, 96px) 64px; }
+.section { position: relative; min-height: 100vh; min-height: 100dvh; padding: 120px clamp(16px, 6vw, 96px) 64px; }
 
 .hero { display: flex; align-items: center; }
 .hero .copy { max-width: 560px; }
@@ -42,7 +42,7 @@ body { font-family: var(--font-body); color: var(--ink); -webkit-font-smoothing:
 .w > span { display: inline-block; }
 .lead { max-width: 380px; margin-top: 22px; font-size: clamp(17px, 1.6vw, 21px); line-height: 1.45; }
 
-.sabores { height: 100vh; }
+.sabores { height: 100vh; height: 100dvh; }
 .flavor-info { position: absolute; left: clamp(16px, 6vw, 96px); bottom: 64px; max-width: 420px; }
 .eyebrow { font-weight: 800; font-size: 14px; letter-spacing: .12em; text-transform: uppercase; }
 .flavor-name { margin-top: 10px; font-size: clamp(40px, 6vw, 88px); }
@@ -53,15 +53,17 @@ body { font-family: var(--font-body); color: var(--ink); -webkit-font-smoothing:
 
 .ingredientes { display: flex; flex-direction: column; justify-content: center; }
 .section-title { max-width: 60%; font-family: var(--font-display); font-weight: 900; font-size: clamp(32px, 4vw, 56px); letter-spacing: -0.03em; }
-.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; max-width: 900px; margin-top: 40px; }
+.cards { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 18px; max-width: 820px; margin-top: 40px; }
 .card { background: #fff; border-radius: 20px; padding: 26px; }
+.card:first-child { grid-row: span 2; display: flex; flex-direction: column; justify-content: flex-end; padding: 34px; }
+.card:first-child .num { font-size: clamp(88px, 8.5vw, 128px); }
 .num { font-size: clamp(44px, 5vw, 64px); }
 .num small { margin-left: 4px; font-size: .4em; }
 .card h3 { margin-top: 10px; font-size: 19px; font-weight: 800; }
 .card p:last-child { margin-top: 6px; font-size: 15px; line-height: 1.45; opacity: .75; }
 
-.cta { display: flex; flex-direction: column; justify-content: center; color: var(--creme); }
-.cta h2 { font-size: clamp(56px, 9vw, 128px); }
+.cta { display: flex; flex-direction: column; justify-content: flex-start; align-items: flex-start; padding-top: clamp(110px, 18dvh, 200px); color: var(--creme); }
+.cta h2 { font-size: clamp(48px, 7.5vw, 112px); }
 .footer { position: absolute; left: clamp(16px, 6vw, 96px); bottom: 28px; font-size: 14px; opacity: .6; }
 
 .cursor { position: fixed; left: 0; top: 0; z-index: 100; width: 18px; height: 18px; border-radius: 50%; background: var(--flavor); pointer-events: none; transition: width .25s, height .25s, opacity .25s, background-color .4s; }
@@ -77,6 +79,7 @@ body { font-family: var(--font-body); color: var(--ink); -webkit-font-smoothing:
   .hero .copy { max-width: 100%; }
   .section-title { max-width: 100%; }
   .cards { grid-template-columns: 1fr; }
+  .card:first-child { grid-row: auto; }
   .flavor-info { right: 16px; bottom: 100px; }
   .dots { top: auto; bottom: 64px; right: 16px; transform: none; flex-direction: row; }
   .no-webgl .fallback-can { top: auto; bottom: 4vh; right: 50%; height: 42vh; transform: translateX(50%); }

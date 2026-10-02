@@ -94,7 +94,8 @@ async function start() {
   const pointer = { x: 0, y: 0 };
   if (!reduced) addEventListener('pointermove', (e) => { pointer.x = (e.clientX / innerWidth) * 2 - 1; pointer.y = (e.clientY / innerHeight) * 2 - 1; });
 
-  let prev = performance.now();
+  const TAU = Math.PI * 2;
+  let prev = performance.now(), ctaSpin = 0;
   s3.renderer.setAnimationLoop((now) => {
     const dt = Math.min((now - prev) / 1000, 0.05); prev = now;
     const t = now / 1000;
@@ -107,15 +108,17 @@ async function start() {
     g.position.set((state.x * w) / 2, (state.y * h) / 2 + state.drop * h + Math.sin(t * 1.1) * 0.06 * idle, 0);
     g.scale.setScalar(state.s);
     const spin = reduced ? 0 : presentationSpin(fs);
-    g.rotation.set(0.12 + pointer.y * 0.12 * idle, spin - 0.4 + pointer.x * 0.25 * idle, -0.14);
+    const ctaOn = reduced ? (state.section === 'cta' ? 1 : 0) : state.cta;
+    // giro lento no CTA acumulado por frame (t * ctaOn giraria rápido durante o scrub); fora dele volta pra frente
+    ctaSpin = ctaOn > 0.01 ? ctaSpin + dt * 0.6 * ctaOn * idle : ctaSpin + (Math.round(ctaSpin / TAU) * TAU - ctaSpin) * Math.min(dt * 4, 1);
+    g.rotation.set(0.12 + pointer.y * 0.12 * idle, spin - 0.4 + pointer.x * 0.25 * idle + ctaSpin, -0.14);
     hero.setOpen(state.open);
 
     if (changed) cursor.setColor(FLAVORS[cur].a);
 
-    const ctaOn = reduced ? (state.section === 'cta' ? 1 : 0) : state.cta;
     extras.forEach((c, i) => {
       c.group.visible = ctaOn > 0.01;
-      c.group.position.set(((-0.6 + i * 0.4) * w) / 2, (poses.cta.y * h) / 2, 0);
+      c.group.position.set((poses.slots[i] * w) / 2, (poses.cta.y * h) / 2, 0);
       c.group.scale.setScalar(poses.cta.s * ctaOn);
       c.group.rotation.set(0.1, t * 0.6 * idle + i, -0.1);
       c.update(dt, t);
