@@ -19,3 +19,10 @@ export function presentationSpin({ from, mix }) {
   const eased = 0.5 - Math.cos(Math.PI * mix) / 2; // easeInOutSine
   return (from + eased) * Math.PI * 2;
 }
+
+// CTA: as três latas da fileira mostram os outros sabores em ordem; a 4ª (principal) é o sabor atual
+export function ctaSlots(cur, count) {
+  const slots = [];
+  for (let k = 0; k < count; k++) if (k !== cur) slots.push(k);
+  return [...slots, cur];
+}

@@ -67,6 +67,10 @@ body { font-family: var(--font-body); color: var(--ink); -webkit-font-smoothing:
 
 .cta { display: flex; flex-direction: column; justify-content: flex-start; align-items: flex-start; padding-top: clamp(110px, 18dvh, 200px); color: var(--creme); }
 .cta h2 { font-size: clamp(48px, 7.5vw, 112px); }
+.can-labels { position: fixed; inset: 0; z-index: 3; pointer-events: none; }
+.can-label { position: absolute; left: 0; top: 0; pointer-events: auto; max-width: min(180px, 22vw); min-height: 44px; padding: 6px 12px; border: 0; border-radius: 22px; background: transparent; color: var(--creme); font: 600 14px/1.15 var(--font-body); text-align: center; cursor: pointer; transition: background-color .2s, color .2s; }
+.can-label.is-hot, .can-label:focus-visible { background: var(--creme); color: var(--ink); }
+.can-label:focus-visible { outline: 2px solid var(--flavor); outline-offset: 2px; }
 .footer { position: absolute; left: clamp(16px, 6vw, 96px); bottom: 28px; font-size: 14px; opacity: .6; }
 
 .cursor { position: fixed; left: 0; top: 0; z-index: 100; width: 18px; height: 18px; border-radius: 50%; background: var(--flavor); box-shadow: 0 0 0 2px var(--ink); pointer-events: none; transition: width .25s, height .25s, opacity .25s, background-color .4s; }
@@ -89,5 +93,5 @@ body { font-family: var(--font-body); color: var(--ink); -webkit-font-smoothing:
   .no-webgl .fallback-can { top: auto; bottom: 4vh; right: 50%; height: 42vh; transform: translateX(50%); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .bg-a, .bg-word, .btn, .nav, .dots button { transition: none; }
+  .bg-a, .bg-word, .btn, .nav, .dots button, .can-label { transition: none; }
 }

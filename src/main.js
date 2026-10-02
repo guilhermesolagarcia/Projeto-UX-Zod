@@ -1,8 +1,8 @@
 import './style.css';
-import { Color } from 'three';
+import { Color, Raycaster, Vector2, Vector3 } from 'three';
 import { gsap } from 'gsap';
 import { BRAND, FLAVORS } from './flavors.js';
-import { flavorState, currentFlavor, presentationSpin } from './scrollState.js';
+import { flavorState, currentFlavor, presentationSpin, ctaSlots } from './scrollState.js';
 import { loadLabelFonts } from './labels.js';
 import { createScene } from './scene.js';
 import { createCan, preloadLabels } from './can.js';
@@ -11,6 +11,7 @@ import { initCursor } from './cursor.js';
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const mobile = matchMedia('(max-width: 768px), (pointer: coarse)').matches; // só pra qualidade do renderer
+const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches; // raycast nas latas do CTA só com mouse
 const root = document.documentElement;
 const SECTION_BG = { hero: FLAVORS[0].a, ingredientes: '#F4F1EA', cta: '#111111' };
 const RIM_A = FLAVORS.map((f) => new Color(f.a)), RIM_B = FLAVORS.map((f) => new Color(f.b)), WHITE = new Color('#fff'), rimMix = new Color();
@@ -25,6 +26,8 @@ const ui = {
   bgA: document.querySelector('.bg-a'),
   bgB: document.querySelector('.bg-b'),
   words: [...document.querySelectorAll('.bg-word span')],
+  labelBox: document.querySelector('.can-labels'),
+  labels: [...document.querySelectorAll('.can-label')],
 };
 
 function hasWebGL() {
@@ -99,7 +102,8 @@ function fallback() {
 
 async function start() {
   // scroll primeiro: pin, seções e a intro do título não esperam fontes nem 3D
-  bindControls(initScroll({ state, reducedMotion: reduced }));
+  const scroll = initScroll({ state, reducedMotion: reduced });
+  bindControls(scroll);
   if (!hasWebGL()) return fallback();
 
   let s3, hero, extras;
@@ -124,7 +128,22 @@ async function start() {
 
   const cursor = initCursor();
   const pointer = { x: 0, y: 0 };
-  if (!reduced) addEventListener('pointermove', (e) => { pointer.x = (e.clientX / innerWidth) * 2 - 1; pointer.y = (e.clientY / innerHeight) * 2 - 1; });
+  addEventListener('pointermove', (e) => { pointer.x = (e.clientX / innerWidth) * 2 - 1; pointer.y = (e.clientY / innerHeight) * 2 - 1; });
+
+  // CTA: latas por slot (3 extras + a principal), rótulos-botão e hover por raycast
+  const cans = [...extras, hero];
+  cans.forEach((c, k) => c.group.children[0].traverse((o) => { o.userData.slot = k; }));
+  const targets = cans.map((c) => c.group.children[0]);
+  const ray = new Raycaster(), ndc = new Vector2(), base = new Vector3();
+  const lift = [0, 0, 0, 0], liftV = [0, 0, 0, 0];
+  let slotMap = ctaSlots(FLAVORS.length - 1, FLAVORS.length), canHover = -1, labelHover = -1;
+  const pick = (k) => scroll.goToFlavor(slotMap[k], FLAVORS.length);
+  ui.labels.forEach((b, k) => {
+    b.addEventListener('click', () => pick(k));
+    b.addEventListener('pointerenter', () => { labelHover = k; }); b.addEventListener('pointerleave', () => { labelHover = -1; });
+    b.addEventListener('focus', () => { labelHover = k; }); b.addEventListener('blur', () => { labelHover = -1; });
+  });
+  addEventListener('click', (e) => { if (canHover >= 0 && !e.target.closest('a, button')) pick(canHover); });
 
   const TAU = Math.PI * 2;
   let prev = performance.now(), ctaSpin = 0, tilt = 0, tiltV = 0;
@@ -134,13 +153,33 @@ async function start() {
     const { fs, cur, changed } = tickUI();
     const idle = reduced ? 0 : 1;
     const { w, h } = s3.viewSize();
+    const ctaOn = reduced ? (state.section === 'cta' ? 1 : 0) : state.cta;
+    const inCta = state.section === 'cta' && ctaOn > 0.9;
+    const poses = currentPoses();
+
+    if (changed) {
+      slotMap = ctaSlots(cur, FLAVORS.length);
+      extras.forEach((c, k) => c.setFlavors(slotMap[k], slotMap[k], 0));
+      ui.labels.forEach((b, k) => { b.textContent = FLAVORS[slotMap[k]].title; });
+    }
+    let hit = -1;
+    if (inCta && finePointer) {
+      ray.setFromCamera(ndc.set(pointer.x, -pointer.y), s3.camera);
+      const first = ray.intersectObjects(targets, true)[0];
+      if (first) hit = first.object.userData.slot;
+    }
+    if (hit !== canHover) { canHover = hit; cursor.setHover(hit >= 0); }
+    const hot = inCta ? (canHover >= 0 ? canHover : labelHover) : -1;
+    for (let k = 0; k < 4; k++) {
+      if (reduced) { lift[k] = 0; continue; }
+      liftV[k] += (((hot === k ? 1 : 0) - lift[k]) * 160 - liftV[k] * 18) * dt; lift[k] += liftV[k] * dt;
+    }
 
     hero.setFlavors(fs.from, fs.to, fs.mix);
     const g = hero.group;
-    g.position.set((state.x * w) / 2, (state.y * h) / 2 + state.drop * h + Math.sin(t * 1.1) * 0.06 * idle, 0);
-    g.scale.setScalar(state.s);
+    g.position.set((state.x * w) / 2, (state.y * h) / 2 + state.drop * h + Math.sin(t * 1.1) * 0.06 * idle + lift[3] * 0.18, 0);
+    g.scale.setScalar(state.s * (1 + lift[3] * 0.08));
     const spin = reduced ? 0 : presentationSpin(fs);
-    const ctaOn = reduced ? (state.section === 'cta' ? 1 : 0) : state.cta;
     // giro lento no CTA acumulado por frame (t * ctaOn giraria rápido durante o scrub); fora dele volta pra frente
     ctaSpin = ctaOn > 0.01 ? ctaSpin + dt * 0.6 * ctaOn * idle : ctaSpin + (Math.round(ctaSpin / TAU) * TAU - ctaSpin) * Math.min(dt * 4, 1);
     // mola: a lata inclina com a velocidade da rolagem e volta balançando quando para
@@ -153,13 +192,21 @@ async function start() {
     const rimColor = sec === 'sabores' ? rimMix.lerpColors(RIM_B[fs.from], RIM_B[fs.to], fs.mix) : sec === 'ingredientes' ? WHITE : sec === 'cta' ? RIM_A[cur] : RIM_B[0];
     s3.setRim(rimColor, sec === 'ingredientes' ? 3 : 4, reduced ? 1 : 0.08);
 
-    const poses = currentPoses();
     extras.forEach((c, i) => {
       c.group.visible = ctaOn > 0.01;
-      c.group.position.set((poses.slots[i] * w) / 2, (poses.cta.y * h) / 2, 0);
-      c.group.scale.setScalar(poses.cta.s * ctaOn);
+      c.group.position.set((poses.slots[i] * w) / 2, (poses.cta.y * h) / 2 + lift[i] * 0.18, 0);
+      c.group.scale.setScalar(poses.cta.s * ctaOn * (1 + lift[i] * 0.08));
       c.group.rotation.set(0.1, (t * 0.6 + i) * idle, -0.1);
       c.update(dt, t);
+    });
+
+    // rótulos sob a base de cada lata (sem o levantar do hover)
+    paint('labels', inCta, (v) => { ui.labelBox.hidden = !v; });
+    if (inCta) cans.forEach((c, k) => {
+      const extra = k < 3, sc = extra ? poses.cta.s * ctaOn : state.s;
+      base.set(c.group.position.x, ((extra ? poses.cta.y : state.y) * h) / 2 - 1.75 * sc, 0).project(s3.camera);
+      ui.labels[k].style.transform = `translate(${((base.x + 1) / 2) * innerWidth}px, ${((1 - base.y) / 2) * innerHeight}px) translate(-50%, 6px)`;
+      ui.labels[k].classList.toggle('is-hot', hot === k);
     });
 
     hero.update(dt, t);

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { flavorState, currentFlavor, presentationSpin } from '../src/scrollState.js';
+import { flavorState, currentFlavor, presentationSpin, ctaSlots } from '../src/scrollState.js';
 
 test('começo da seção mostra o primeiro sabor parado', () => {
   assert.deepEqual(flavorState(0, 4), { from: 0, to: 1, mix: 0 });
@@ -56,4 +56,13 @@ test('presentationSpin: contínuo entre o fim de uma troca e o descanso seguinte
 
 test('presentationSpin: verso só no meio da troca', () => {
   for (let from = 0; from < 3; from++) close(presentationSpin({ from, mix: 0.5 }), from * TAU + Math.PI);
+});
+
+test('CTA chegando pelo scroll: fileira 0,1,2 e Grape na lata principal', () => {
+  assert.deepEqual(ctaSlots(3, 4), [0, 1, 2, 3]);
+});
+
+test('CTA com outro sabor atual: ele vai pra lata principal e os outros seguem em ordem', () => {
+  assert.deepEqual(ctaSlots(1, 4), [0, 2, 3, 1]);
+  assert.deepEqual(ctaSlots(0, 4), [1, 2, 3, 0]);
 });
