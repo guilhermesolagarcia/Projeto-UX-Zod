@@ -105,6 +105,8 @@ main { overflow-x: clip; } /* a faixa inclinada passa da largura da tela */
   .card:first-child { grid-row: auto; }
   .ingredientes { padding-top: 96px; padding-bottom: 24px; } /* com o pin, título + 3 cards cabem numa tela de celular */
   .cards { gap: 12px; margin-top: 24px; }
+  .card { padding: 22px; } .card:first-child { padding: 28px; }
+  .card:nth-child(2) { padding-bottom: 64px; background-size: 100% 48px; }
   .flavor-info { right: 16px; bottom: 100px; }
   .bg-word { bottom: 25%; }
   .dots { top: auto; bottom: 64px; right: 16px; transform: none; flex-direction: row; }
