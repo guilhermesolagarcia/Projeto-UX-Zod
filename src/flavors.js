@@ -1,4 +1,4 @@
-export const BRAND = 'SUA MARCA';
+export const BRAND = 'ZOD';
 
 export const FLAVORS = [
   { title: 'Tropical Passion', name: 'TROPICAL PASSION', l1: 'TROPICAL', l2: 'PASSION', a: '#FFB800', b: '#FF5A1F', bdeep: '#E0400A', inkB: '#111', desc: 'Manga e maracujá num pôr do sol que cabe na lata.' },

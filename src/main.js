@@ -18,7 +18,9 @@ const SECTION_BG = { hero: FLAVORS[0].a, ingredientes: '#F4F1EA', cta: '#111111'
 const dark = (c) => c.getHSL({}).l < 0.08; // HSL em espaço linear: Grape 0,06, Lime 0,10
 const RIM_A = FLAVORS.map((f) => new Color(f.a)), RIM_B = FLAVORS.map((f) => (dark(new Color(f.b)) ? new Color(f.a) : new Color(f.b))), WHITE = new Color('#fff'), rimMix = new Color();
 
-document.querySelectorAll('[data-brand]').forEach((el) => { el.textContent = BRAND; });
+// logo: o "O" vira o lacre (escondido do leitor de tela, que lê o nome num texto visualmente oculto)
+const lacreO = `<svg class="logo-o" viewBox="0 0 100 100"><path fill-rule="evenodd" d="${LACRE}"/></svg>`;
+document.querySelectorAll('[data-brand]').forEach((el) => { el.innerHTML = `<span class="sr-only">${BRAND}</span><span aria-hidden="true">${BRAND.replace('O', lacreO)}</span>`; });
 
 // faixa de sabores separados pelo lacre; cada metade tem o conjunto 2× pra não abrir buraco em tela larga
 const lacre = `<svg viewBox="18 6 64 88"><path fill-rule="evenodd" d="${LACRE}"/></svg>`;
