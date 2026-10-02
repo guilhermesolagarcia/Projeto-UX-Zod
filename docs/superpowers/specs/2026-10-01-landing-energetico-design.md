@@ -18,7 +18,7 @@ Landing page de uma marca **fictícia** de energético, feita como peça de port
 ## 2. Marca
 
 ### 2.1 Nome
-**Ainda não definido.** O provisório é `SUA MARCA`. O nome fica em um lugar só (`flavors.js`) e é desenhado em código na lata, então trocar depois é imediato.
+O nome é **ZOD**. O logo usa o símbolo do lacre como o "O", no cabeçalho e no rodapé. O nome fica em um lugar só (`flavors.js`) e é desenhado em código na lata.
 
 ### 2.2 Tipografia
 | Uso | Fonte |
@@ -143,5 +143,4 @@ public/sfx/    → som de abertura da lata
 
 ## 8. Pendências
 
-- **Nome da marca:** segue como `SUA MARCA` até ser definido
 - **img2threejs:** opcional, já que a lata procedural atende. Pode entrar depois pra mais detalhe no metal.
