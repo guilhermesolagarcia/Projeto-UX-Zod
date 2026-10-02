@@ -100,6 +100,8 @@ main { overflow-x: clip; } /* a faixa inclinada passa da largura da tela */
   .section-title { max-width: calc(100% - 64px); } /* canto direito livre pra lata pequena */
   .cards { grid-template-columns: 1fr; max-width: none; }
   .card:first-child { grid-row: auto; }
+  .ingredientes { padding-top: 96px; padding-bottom: 24px; } /* com o pin, título + 3 cards cabem numa tela de celular */
+  .cards { gap: 12px; margin-top: 24px; }
   .flavor-info { right: 16px; bottom: 100px; }
   .bg-word { bottom: 25%; }
   .dots { top: auto; bottom: 64px; right: 16px; transform: none; flex-direction: row; }

@@ -25,10 +25,13 @@ export function initScroll({ state, reducedMotion }) {
 
   // o pin vem antes dos triggers de seção: sem ScrollSmoother eles precisam medir já com o espaçador do pin
   const flavors = ScrollTrigger.create({ trigger: '#sabores', start: 'top top', end: '+=600%', pin: true, onUpdate: (self) => { state.flavorP = Math.min(self.progress / (1 - TAIL), 1); } });
+  // ingredientes também trava: cards e linhas entram presos ao scroll (se a seção não couber na tela, trava pela base)
+  const ingEl = document.querySelector('#ingredientes');
+  const ing = ScrollTrigger.create({ trigger: ingEl, start: () => (ingEl.offsetHeight > innerHeight ? 'bottom bottom' : 'top top'), end: '+=200%', pin: true });
 
-  // em #sabores o trigger é o espaçador do pin (700% de altura), senão a seção só valeria nos primeiros 100%
+  // nas seções com pin o trigger é o espaçador (sabores 700%, ingredientes 300%), senão a seção só valeria nos primeiros 100%
   for (const id of ['hero', 'sabores', 'ingredientes', 'cta']) {
-    ScrollTrigger.create({ trigger: id === 'sabores' ? flavors.pin.parentNode : `#${id}`, start: 'top center', end: 'bottom center', onToggle: (self) => { if (self.isActive) state.section = id; } });
+    ScrollTrigger.create({ trigger: id === 'sabores' ? flavors.pin.parentNode : id === 'ingredientes' ? ing.pin.parentNode : `#${id}`, start: 'top center', end: 'bottom center', onToggle: (self) => { if (self.isActive) state.section = id; } });
   }
 
   if (!reducedMotion) {
@@ -48,15 +51,21 @@ export function initScroll({ state, reducedMotion }) {
       const scrub = (trigger, start, end) => ({ trigger, start, end, scrub: true });
       // hero → sabores: a lata vai pro centro
       gsap.fromTo(state, { ...p.hero }, { ...p.sabores, ease: 'none', scrollTrigger: scrub('#sabores', 'top bottom', 'top top') });
-      // sabores → ingredientes: encolhe e vai pro canto
-      gsap.fromTo(state, { ...p.sabores }, { ...p.ingredientes, ease: 'none', immediateRender: false, scrollTrigger: scrub('#ingredientes', 'top bottom', 'top 20%') });
+      // sabores → ingredientes: encolhe, vai pro canto e termina de virar o verso quando o pin começa
+      gsap.fromTo(state, { ...p.sabores }, { ...p.ingredientes, ease: 'none', immediateRender: false, scrollTrigger: scrub('#ingredientes', 'top bottom', () => ing.start) });
       // ingredientes → CTA: desce pra fileira e as outras três latas aparecem
       gsap.fromTo(state, { ...p.ingredientes, cta: 0 }, { ...p.cta, cta: 1, ease: 'none', immediateRender: false, scrollTrigger: scrub('#cta', 'top bottom', 'top top') });
     });
 
-    gsap.from('.card', { y: 40, opacity: 0, stagger: 0.15, duration: 0.8, ease: 'power3.out', scrollTrigger: { trigger: '.cards', start: 'top 75%' } });
-    // linhas card → tabela: esperam a lata terminar de virar (pose em "top 20%") e se desenham na ordem dos cards
-    gsap.fromTo(state.lines, { p: 0 }, { p: 1, stagger: 0.15, duration: 0.6, ease: 'power2.out', scrollTrigger: { trigger: '#ingredientes', start: 'top 20%' } });
+    // durante o pin do ingredientes (progresso 0–1): 0–20% a lata já virada, 20–90% cada card entra seguido da linha até a
+    // sua linha da tabela (160/Cafeína, 0g/Açúcares, B12/Vitamina B12), 90–100% tudo parado; subir desfaz
+    const tl = gsap.timeline({ scrollTrigger: { trigger: ingEl, start: () => ing.start, end: () => ing.end, scrub: true } });
+    gsap.utils.toArray('.card').forEach((card, i) => {
+      const at = 0.2 + i * (0.7 / 3);
+      tl.fromTo(card, { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.1, ease: 'power3.out' }, at)
+        .fromTo(state.lines[i], { p: 0 }, { p: 1, duration: 0.12, ease: 'power2.out' }, at + 0.1);
+    });
+    tl.set({}, {}, 1);
   }
 
   // links internos (#sabores, #cta…) usam a rolagem suave
@@ -66,6 +75,7 @@ export function initScroll({ state, reducedMotion }) {
     if (!target) return;
     e.preventDefault();
     if (href === '#sabores') scrollTo(flavors.start);
+    else if (href === '#ingredientes') scrollTo(ing.start);
     else scrollTo(smoother ? target : target.getBoundingClientRect().top + window.scrollY);
   }));
 
