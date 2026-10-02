@@ -3,15 +3,14 @@ import { BRAND, FLAVORS } from './flavors.js';
 import { flavorState, currentFlavor, presentationSpin } from './scrollState.js';
 import { loadLabelFonts } from './labels.js';
 import { createScene } from './scene.js';
-import { createCan } from './can.js';
-import { createState, initScroll, POSES } from './scroll.js';
+import { createCan, preloadLabels } from './can.js';
+import { createState, initScroll, currentPoses } from './scroll.js';
 import { initCursor } from './cursor.js';
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const mobile = matchMedia('(max-width: 768px), (pointer: coarse)').matches;
+const mobile = matchMedia('(max-width: 768px), (pointer: coarse)').matches; // só pra qualidade do renderer
 const root = document.documentElement;
 const SECTION_BG = { hero: FLAVORS[0].a, ingredientes: '#F4F1EA', cta: '#111111' };
-const poses = POSES[mobile ? 'mobile' : 'desktop'];
 
 document.querySelectorAll('[data-brand]').forEach((el) => { el.textContent = BRAND; });
 
@@ -25,7 +24,11 @@ const ui = {
 };
 
 function hasWebGL() {
-  try { return !!document.createElement('canvas').getContext('webgl2'); } catch { return false; }
+  try {
+    const gl = document.createElement('canvas').getContext('webgl2');
+    gl?.getExtension('WEBGL_lose_context')?.loseContext();
+    return !!gl;
+  } catch { return false; }
 }
 
 function showFlavor(i) {
@@ -38,23 +41,22 @@ function showFlavor(i) {
   if (!reduced) ui.name.animate([{ opacity: 0, transform: 'translateY(24px)' }, { opacity: 1, transform: 'none' }], { duration: 450, easing: 'cubic-bezier(.2,.8,.2,1)' });
 }
 
+// só escreve no DOM quando o valor muda
+const painted = {};
+function paint(key, value, write) { if (painted[key] !== value) { painted[key] = value; write(value); } }
 function paintBackground(section, fs) {
-  root.dataset.section = section;
-  if (section === 'sabores') {
-    ui.bgA.style.backgroundColor = FLAVORS[fs.from].a;
-    ui.bgB.style.backgroundColor = ui.bgB.style.color = FLAVORS[fs.to].a;
-    ui.bgB.style.transform = `translateY(${(1 - fs.mix) * 105}%)`;
-  } else {
-    ui.bgA.style.backgroundColor = SECTION_BG[section];
-    ui.bgB.style.transform = 'translateY(105%)';
-  }
+  paint('section', section, (v) => { root.dataset.section = v; });
+  const sab = section === 'sabores';
+  paint('a', sab ? FLAVORS[fs.from].a : SECTION_BG[section], (v) => { ui.bgA.style.backgroundColor = v; });
+  if (sab) paint('b', FLAVORS[fs.to].a, (v) => { ui.bgB.style.backgroundColor = ui.bgB.style.color = v; });
+  paint('t', `translateY(${sab ? (1 - fs.mix) * 105 : 105}%)`, (v) => { ui.bgB.style.transform = v; });
 }
 
-const state = createState(mobile);
+const state = createState();
 let lastFlavor = -1;
 
 function tickUI() {
-  if (reduced) Object.assign(state, poses[state.section]);
+  if (reduced) Object.assign(state, currentPoses()[state.section]);
   const fs = flavorState(state.flavorP, FLAVORS.length);
   if (reduced) fs.mix = Math.round(fs.mix);
   const cur = currentFlavor(fs);
@@ -68,27 +70,35 @@ function bindControls(scroll) {
   ui.dots.forEach((d, i) => d.addEventListener('click', () => scroll.goToFlavor(i, FLAVORS.length)));
 }
 
+function fallback() {
+  root.classList.add('no-webgl');
+  (function loop() { tickUI(); requestAnimationFrame(loop); })();
+}
+
 async function start() {
-  if (!hasWebGL()) {
-    root.classList.add('no-webgl');
-    bindControls(initScroll({ state, mobile, reducedMotion: reduced }));
-    (function loop() { tickUI(); requestAnimationFrame(loop); })();
-    return;
+  // scroll primeiro: pin, seções e a intro do título não esperam fontes nem 3D
+  bindControls(initScroll({ state, reducedMotion: reduced }));
+  if (!hasWebGL()) return fallback();
+
+  let s3, hero, extras;
+  try {
+    await loadLabelFonts();
+    s3 = createScene(document.getElementById('scene'), { mobile });
+    hero = createCan({ condensation: !reduced });
+    s3.scene.add(hero.group);
+    extras = [0, 1, 2].map((i) => {
+      const c = createCan({ condensation: false });
+      c.setFlavors(i, i, 0);
+      c.group.visible = false;
+      s3.scene.add(c.group);
+      return c;
+    });
+    preloadLabels(s3.renderer, FLAVORS.length);
+  } catch (err) {
+    console.error(err);
+    s3?.renderer.dispose();
+    return fallback();
   }
-
-  await loadLabelFonts();
-  const s3 = createScene(document.getElementById('scene'), { mobile });
-  const hero = createCan({ condensation: !reduced });
-  s3.scene.add(hero.group);
-  const extras = [0, 1, 2].map((i) => {
-    const c = createCan({ condensation: false });
-    c.setFlavors(i, i, 0);
-    c.group.visible = false;
-    s3.scene.add(c.group);
-    return c;
-  });
-
-  bindControls(initScroll({ state, mobile, reducedMotion: reduced }));
 
   const cursor = initCursor();
   const pointer = { x: 0, y: 0 };
@@ -116,11 +126,12 @@ async function start() {
 
     if (changed) cursor.setColor(FLAVORS[cur].a);
 
+    const poses = currentPoses();
     extras.forEach((c, i) => {
       c.group.visible = ctaOn > 0.01;
       c.group.position.set((poses.slots[i] * w) / 2, (poses.cta.y * h) / 2, 0);
       c.group.scale.setScalar(poses.cta.s * ctaOn);
-      c.group.rotation.set(0.1, t * 0.6 * idle + i, -0.1);
+      c.group.rotation.set(0.1, (t * 0.6 + i) * idle, -0.1);
       c.update(dt, t);
     });
 

@@ -7,15 +7,21 @@ const BODY = [V(0.66, -1.55), V(0.66, 1.35)];
 const TOP = [V(0.66, 1.35), V(0.655, 1.42), V(0.6, 1.55), V(0.56, 1.62), V(0.568, 1.665), V(0.574, 1.695), V(0.56, 1.712), V(0.542, 1.70), V(0.53, 1.66), V(0.3, 1.648), V(0, 1.645)];
 const BOTTOM = [V(0, -1.6), V(0.3, -1.63), V(0.45, -1.685), V(0.5, -1.70), V(0.58, -1.68), V(0.64, -1.62), V(0.66, -1.55)];
 
-// texturas de rótulo compartilhadas entre todas as latas
+// texturas de rótulo compartilhadas entre todas as latas; no celular em meia resolução (1024×716)
+const LABEL_SCALE = matchMedia('(max-width: 768px)').matches ? 0.5 : 1;
 const texCache = new Map();
 function labelTextures(i) {
   if (texCache.has(i)) return texCache.get(i);
-  const c = drawLabelMaps(i);
+  const c = drawLabelMaps(i, { scale: LABEL_SCALE });
   const tex = (cv, srgb) => { const t = new THREE.CanvasTexture(cv); if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t; };
   const out = { map: tex(c.color, true), rough: tex(c.rough), metal: tex(c.metal), bump: tex(c.bump) };
   texCache.set(i, out);
   return out;
+}
+
+// desenha e sobe pra GPU todos os rótulos antes do loop, pra troca de sabor não engasgar no meio do scroll
+export function preloadLabels(renderer, count) {
+  for (let i = 0; i < count; i++) Object.values(labelTextures(i)).forEach((t) => renderer.initTexture(t));
 }
 
 let tabGeo = null;

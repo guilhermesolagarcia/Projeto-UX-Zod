@@ -4,11 +4,12 @@ export function initCursor() {
   dot.className = 'cursor';
   document.body.append(dot);
   document.documentElement.classList.add('has-cursor');
+  const k = matchMedia('(prefers-reduced-motion: reduce)').matches ? 1 : 0.25; // sem rastro em movimento reduzido
   let x = -100, y = -100, cx = x, cy = y;
   addEventListener('pointermove', (e) => { x = e.clientX; y = e.clientY; });
   document.addEventListener('pointerover', (e) => { dot.classList.toggle('is-hover', !!e.target.closest('a, button')); });
   (function loop() {
-    cx += (x - cx) * 0.25; cy += (y - cy) * 0.25;
+    cx += (x - cx) * k; cy += (y - cy) * k;
     dot.style.transform = `translate(${cx}px, ${cy}px) translate(-50%, -50%)`;
     requestAnimationFrame(loop);
   })();

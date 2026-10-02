@@ -6,23 +6,28 @@ gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
 
 export const POSES = {
   desktop: { hero: { x: 0.42, y: -0.08, s: 0.85 }, sabores: { x: 0.28, y: 0.02, s: 1 }, ingredientes: { x: 0.68, y: 0.35, s: 0.45 }, cta: { x: 0.54, y: -0.48, s: 0.4 }, slots: [-0.54, -0.18, 0.18] },
-  mobile: { hero: { x: 0.1, y: -0.42, s: 0.6 }, sabores: { x: 0, y: 0.25, s: 0.75 }, ingredientes: { x: 0.6, y: 0.62, s: 0.3 }, cta: { x: 0.66, y: -0.5, s: 0.24 }, slots: [-0.66, -0.22, 0.22] },
+  mobile: { hero: { x: 0.1, y: -0.42, s: 0.6 }, sabores: { x: 0, y: 0.25, s: 0.75 }, ingredientes: { x: 0.78, y: 0.88, s: 0.18 }, cta: { x: 0.66, y: -0.5, s: 0.24 }, slots: [-0.66, -0.22, 0.22] },
 };
 
-export function createState(mobile) {
-  return { ...POSES[mobile ? 'mobile' : 'desktop'].hero, drop: 0, open: 0, flavorP: 0, cta: 0, section: 'hero' };
+const narrow = matchMedia('(max-width: 768px)'); // mesma query do CSS
+export const currentPoses = () => POSES[narrow.matches ? 'mobile' : 'desktop'];
+const TAIL = 0.15; // fim do pin em que o último sabor fica parado antes da página seguir
+
+export function createState() {
+  return { ...currentPoses().hero, drop: 0, open: 0, flavorP: 0, cta: 0, section: 'hero' };
 }
 
-export function initScroll({ state, mobile, reducedMotion }) {
-  const poses = POSES[mobile ? 'mobile' : 'desktop'];
+export function initScroll({ state, reducedMotion }) {
   const smoother = reducedMotion ? null : ScrollSmoother.create({ wrapper: '#smooth-wrapper', content: '#smooth-content', smooth: 1.6 });
   const scrollTo = (y) => (smoother ? smoother.scrollTo(y, true) : window.scrollTo({ top: y, behavior: 'auto' }));
 
-  for (const id of ['hero', 'sabores', 'ingredientes', 'cta']) {
-    ScrollTrigger.create({ trigger: `#${id}`, start: 'top center', end: 'bottom center', onToggle: (self) => { if (self.isActive) state.section = id; } });
-  }
+  // o pin vem antes dos triggers de seção: sem ScrollSmoother eles precisam medir já com o espaçador do pin
+  const flavors = ScrollTrigger.create({ trigger: '#sabores', start: 'top top', end: '+=600%', pin: true, onUpdate: (self) => { state.flavorP = Math.min(self.progress / (1 - TAIL), 1); } });
 
-  const flavors = ScrollTrigger.create({ trigger: '#sabores', start: 'top top', end: '+=600%', pin: true, onUpdate: (self) => { state.flavorP = self.progress; } });
+  // em #sabores o trigger é o espaçador do pin (700% de altura), senão a seção só valeria nos primeiros 100%
+  for (const id of ['hero', 'sabores', 'ingredientes', 'cta']) {
+    ScrollTrigger.create({ trigger: id === 'sabores' ? flavors.pin.parentNode : `#${id}`, start: 'top center', end: 'bottom center', onToggle: (self) => { if (self.isActive) state.section = id; } });
+  }
 
   if (!reducedMotion) {
     // abertura: a lata cai quicando, o título sobe palavra por palavra e o lacre abre
@@ -32,12 +37,17 @@ export function initScroll({ state, mobile, reducedMotion }) {
       .from('.hero .w > span', { yPercent: 110, duration: 0.8, stagger: 0.08, ease: 'power3.out' }, 0.3)
       .to(state, { open: 1, duration: 0.25, ease: 'back.out(3)' }, '+=0.15');
 
-    // hero → sabores: a lata vai pro centro
-    gsap.to(state, { ...poses.sabores, ease: 'none', scrollTrigger: { trigger: '#sabores', start: 'top bottom', end: 'top top', scrub: true } });
-    // sabores → ingredientes: encolhe e vai pro canto
-    gsap.to(state, { ...poses.ingredientes, ease: 'none', immediateRender: false, scrollTrigger: { trigger: '#ingredientes', start: 'top bottom', end: 'top 20%', scrub: true } });
-    // ingredientes → CTA: volta e as outras três latas aparecem
-    gsap.to(state, { ...poses.cta, cta: 1, ease: 'none', immediateRender: false, scrollTrigger: { trigger: '#cta', start: 'top bottom', end: 'top top', scrub: true } });
+    // poses da lata por largura; refeitas quando a tela cruza 768px
+    gsap.matchMedia().add({ narrow: '(max-width: 768px)', wide: '(min-width: 769px)' }, () => {
+      const p = currentPoses();
+      const scrub = (trigger, start, end) => ({ trigger, start, end, scrub: true });
+      // hero → sabores: a lata vai pro centro
+      gsap.fromTo(state, { ...p.hero }, { ...p.sabores, ease: 'none', scrollTrigger: scrub('#sabores', 'top bottom', 'top top') });
+      // sabores → ingredientes: encolhe e vai pro canto
+      gsap.fromTo(state, { ...p.sabores }, { ...p.ingredientes, ease: 'none', immediateRender: false, scrollTrigger: scrub('#ingredientes', 'top bottom', 'top 20%') });
+      // ingredientes → CTA: desce pra fileira e as outras três latas aparecem
+      gsap.fromTo(state, { ...p.ingredientes, cta: 0 }, { ...p.cta, cta: 1, ease: 'none', immediateRender: false, scrollTrigger: scrub('#cta', 'top bottom', 'top top') });
+    });
 
     gsap.from('.card', { y: 60, opacity: 0, stagger: 0.12, duration: 0.8, ease: 'power3.out', scrollTrigger: { trigger: '.cards', start: 'top 75%' } });
     document.querySelectorAll('[data-count]').forEach((el) => {
@@ -58,7 +68,7 @@ export function initScroll({ state, mobile, reducedMotion }) {
   }));
 
   function goToFlavor(i, count) {
-    scrollTo(flavors.start + (flavors.end - flavors.start) * (i / (count - 1)));
+    scrollTo(flavors.start + (flavors.end - flavors.start) * (1 - TAIL) * (i / (count - 1)));
   }
 
   return { goToFlavor };

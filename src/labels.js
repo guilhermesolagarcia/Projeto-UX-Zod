@@ -6,8 +6,10 @@ export const LACRE = 'M50 6 C72 6 82 20 82 38 V62 C82 82 70 94 50 94 C30 94 18 8
 const lacrePath = new Path2D(LACRE);
 const WM_FONT = '400 {s}px Shrikhand';
 
+// fonte lenta não segura a página: depois de ~2,5s desenha com o que tiver
 export function loadLabelFonts() {
-  return Promise.all(['900 100px Unbounded', '800 100px "Bricolage Grotesque"', '500 40px "Bricolage Grotesque"', '400 100px Shrikhand'].map((f) => document.fonts.load(f)));
+  const fonts = Promise.all(['900 100px Unbounded', '800 100px "Bricolage Grotesque"', '500 40px "Bricolage Grotesque"', '400 100px Shrikhand'].map((f) => document.fonts.load(f)));
+  return Promise.race([fonts, new Promise((r) => setTimeout(r, 2500))]);
 }
 
 const W = 2048, H = 1432, CX = W / 2;
@@ -205,18 +207,21 @@ function drawGrape(g, c, f, pass) {
 const DRAW = [drawTropical, drawWatermelon, drawLime, drawGrape];
 
 const cache = new Map();
-export function drawLabelMaps(index) {
-  if (cache.has(index)) return cache.get(index);
-  const f = FLAVORS[index], out = {};
+// scale < 1 desenha em resolução menor (celular) sem mexer no código de desenho
+export function drawLabelMaps(index, { scale = 1 } = {}) {
+  const key = `${index}@${scale}`;
+  if (cache.has(key)) return cache.get(key);
+  const f = FLAVORS[index], out = {}, w = Math.round(W * scale), h = Math.round(H * scale);
   for (const pass of ['color', 'rough', 'metal', 'bump']) {
-    const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
-    DRAW[index](cv.getContext('2d'), PASS[pass](f), f, pass);
+    const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+    const g = cv.getContext('2d'); g.scale(scale, scale);
+    DRAW[index](g, PASS[pass](f), f, pass);
     if (pass === 'bump') {
-      const b = document.createElement('canvas'); b.width = W; b.height = H;
-      const bg = b.getContext('2d'); bg.filter = 'blur(3px)'; bg.drawImage(cv, 0, 0);
+      const b = document.createElement('canvas'); b.width = w; b.height = h;
+      const bg = b.getContext('2d'); bg.filter = `blur(${3 * scale}px)`; bg.drawImage(cv, 0, 0);
       out.bump = b;
     } else out[pass] = cv;
   }
-  cache.set(index, out);
+  cache.set(key, out);
   return out;
 }
