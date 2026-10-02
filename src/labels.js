@@ -43,7 +43,6 @@ function backInfo(g, c, f) {
     g.fillRect(130, y + 10, 320, 1.5);
   });
   // texto miúdo + código de barras (lado de trás, à esquerda da emenda)
-  g.font = '500 19px "Bricolage Grotesque"';
   const fine = ['INGREDIENTES: água gaseificada, suco concentrado de', f.l1.toLowerCase() + ', acidulante ácido cítrico, taurina, cafeína,', 'aromatizante natural, edulcorantes sucralose e', 'acessulfame K, vitaminas B3, B6 e B12, corante natural.', 'NÃO CONTÉM GLÚTEN. CONTÉM CAFEÍNA: não recomendado', 'para crianças, gestantes e pessoas sensíveis à cafeína.', 'Consumir gelado. Agite levemente antes de abrir.'];
   g.font = '500 16px "Bricolage Grotesque"'; fine.forEach((t, i) => g.fillText(t, W - 470, 330 + i * 24));
   g.fillStyle = c.light; g.fillRect(W - 470, 540, 300, 180);
@@ -68,12 +67,7 @@ function drawLime(g, c, f, pass) {
   }
   // filete creme acompanhando a onda (a "casca")
   wave(-22); g.strokeStyle = c.light; g.lineWidth = 14; g.stroke();
-  // faixas de topo e base
-  g.fillStyle = c.dark; g.fillRect(0, 0, W, 64); g.fillRect(0, H - 54, W, 54);
-  g.fillStyle = c.emboss; g.font = '900 34px Unbounded'; g.textAlign = 'center';
-  for (let x = CX % 512; x < W; x += 512) g.fillText(BRAND, x, 45);
-  g.font = '800 24px "Bricolage Grotesque"';
-  for (let x = CX % 512 + 256; x < W; x += 512) g.fillText('ENERGY DRINK · 473 ML', x, H - 19);
+  topBottom(g, c);
   // nome: palavra 1 gigante na cor de cima
   g.fillStyle = c.dark; g.font = '800 34px "Bricolage Grotesque"'; g.fillText('ENERGY DRINK  ·  ZERO SUGAR', CX, 250);
   fitFont(g, f.l1, '900 {s}px Unbounded', 1020, 290); g.fillText(f.l1, CX, 520);
@@ -193,8 +187,8 @@ function drawGrape(g, c, f, pass) {
   emblem(g, c, mx, my, 210, c.b);
   // colinas
   const hill = (base, amp, k, ph, col) => { g.fillStyle = col; g.beginPath(); g.moveTo(0, H); for (let x = 0; x <= W; x += 8) g.lineTo(x, base + amp * Math.sin((x / W) * Math.PI * 2 * k + ph)); g.lineTo(W, H); g.closePath(); g.fill(); };
-  hill(1130, 40, 2, 1, c.accent); hill(1210, 30, 3, 0, '#0d0626');
-  if (pass !== 'color') { hill(1130, 40, 2, 1, c.b); hill(1210, 30, 3, 0, c.dark); }
+  const col = pass === 'color';
+  hill(1130, 40, 2, 1, col ? c.accent : c.b); hill(1210, 30, 3, 0, col ? '#0d0626' : c.dark);
   topBottom(g, c);
   g.fillStyle = c.light; g.textAlign = 'center';
   fitFont(g, f.l1, '900 {s}px Unbounded', 1000, 260); g.fillText(f.l1, CX, 850);
