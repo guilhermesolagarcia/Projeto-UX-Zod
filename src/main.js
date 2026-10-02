@@ -14,7 +14,9 @@ const mobile = matchMedia('(max-width: 768px), (pointer: coarse)').matches; // s
 const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches; // raycast nas latas do CTA só com mouse
 const root = document.documentElement;
 const SECTION_BG = { hero: FLAVORS[0].a, ingredientes: '#F4F1EA', cta: '#111111' };
-const RIM_A = FLAVORS.map((f) => new Color(f.a)), RIM_B = FLAVORS.map((f) => new Color(f.b)), WHITE = new Color('#fff'), rimMix = new Color();
+// recorte na cor b do sabor; se ela for escura demais pra aparecer (Grape #24135F), usa a cor a
+const dark = (c) => c.getHSL({}).l < 0.08; // HSL em espaço linear: Grape 0,06, Lime 0,10
+const RIM_A = FLAVORS.map((f) => new Color(f.a)), RIM_B = FLAVORS.map((f) => (dark(new Color(f.b)) ? new Color(f.a) : new Color(f.b))), WHITE = new Color('#fff'), rimMix = new Color();
 
 document.querySelectorAll('[data-brand]').forEach((el) => { el.textContent = BRAND; });
 
