@@ -55,7 +55,7 @@ function showWord(f) {
   const old = ui.words[wordK], el = ui.words[(wordK ^= 1)];
   el.textContent = f.l1; el.style.color = f.b; fitWord(el);
   if (reduced) { gsap.set(old, { opacity: 0 }); gsap.set(el, { opacity: 1 }); return; }
-  gsap.to(old, { yPercent: -110, opacity: 0, duration: 0.7, ease: 'power3.inOut', overwrite: true });
+  gsap.to(old, { yPercent: -110, opacity: 0, duration: 0.7, ease: 'power3.out', overwrite: true });
   gsap.fromTo(el, { yPercent: 110, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.7, ease: 'power3.out', overwrite: true });
 }
 
