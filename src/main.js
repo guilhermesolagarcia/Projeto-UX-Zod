@@ -44,11 +44,11 @@ function hasWebGL() {
   } catch { return false; }
 }
 
-// nome gigante atrás da lata: ocupa ~92vw (limitado pela altura), recalculado no resize e quando a fonte carrega
+// nome gigante atrás da lata: ocupa ~86vw (termina antes da coluna das bolinhas; limitado pela altura), recalculado no resize e quando a fonte carrega
 let wordK = 0;
 function fitWord(el = ui.words[wordK]) {
   el.style.fontSize = '100px';
-  el.style.fontSize = `${Math.min((100 * innerWidth * 0.92) / el.offsetWidth, innerHeight * 0.42)}px`;
+  el.style.fontSize = `${Math.min((100 * innerWidth * 0.86) / el.offsetWidth, innerHeight * 0.42)}px`;
 }
 addEventListener('resize', () => fitWord());
 document.fonts.load('900 100px Unbounded').then(() => fitWord(), () => {});
