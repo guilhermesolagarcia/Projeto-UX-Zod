@@ -156,6 +156,10 @@ async function start() {
   const ROWS = [696, 552, 768].map((y) => [120 / 2048, 1 - (y - 7) / 1432]); // Cafeína, Açúcares totais, Vitamina B12
   const lp = new Vector3(), ln = new Vector3(), eye = new Vector3();
   let leadOp = 0;
+  // caixa final de cada card relativa à seção: offset* ignora transform, então a linha não escorrega enquanto os cards entram
+  const secEl = cards[0].offsetParent, box = [], last = [[], [], []];
+  const measure = () => { cards.forEach((c, i) => { box[i] = [c.offsetLeft, c.offsetTop, c.offsetLeft + c.offsetWidth, c.offsetTop + c.offsetHeight]; }); last.forEach((v) => { v.length = 0; }); };
+  new ResizeObserver(measure).observe(cards[0].parentNode); measure();
 
   const TAU = Math.PI * 2;
   let prev = performance.now(), ctaSpin = 0, tilt = 0, tiltV = 0;
@@ -221,25 +225,30 @@ async function start() {
       ui.labels[k].classList.toggle('is-hot', hot === k);
     });
 
-    // linhas: aparecem com a lata virada no ingredientes e somem (fade) fora dele
+    // linhas: aparecem com a lata virada no ingredientes e somem (fade) fora dele.
+    // 0,12 rad ≈ 7°: a tabela já está de frente; a margem cobre o fim do scrub sem acender durante o giro
     leadOp += ((wide.matches && sec === 'ingredientes' && Math.abs(state.turn - BACK) < 0.12 ? 1 : 0) - leadOp) * (reduced ? 1 : Math.min(dt * 6, 1));
     paint('leadOp', leadOp > 0.01 ? leadOp.toFixed(2) : '0', (v) => { lead.style.opacity = v; });
     if (leadOp > 0.01) {
-      const r = cards.map((c) => c.getBoundingClientRect());
-      ROWS.forEach(([u, v], i) => {
-        hero.labelPoint(u, v, lp, ln);
+      const sr = secEl.getBoundingClientRect(), ox = Math.round(sr.left), oy = Math.round(sr.top);
+      for (let i = 0; i < 3; i++) {
+        hero.labelPoint(ROWS[i][0], ROWS[i][1], lp, ln);
         const back = ln.dot(eye.copy(s3.camera.position).sub(lp)) <= 0;
         lp.project(s3.camera);
-        const x = ((lp.x + 1) / 2) * innerWidth, y = ((1 - lp.y) / 2) * innerHeight;
+        const x = Math.round(((lp.x + 1) / 2) * innerWidth * 2) / 2, y = Math.round(((1 - lp.y) / 2) * innerHeight * 2) / 2;
+        const p = Math.round(state.lines[i].p * 1000) / 1000, v = last[i];
+        // só escreve no DOM quando algo mudou (quadro parado = zero escritas)
+        if (v[0] === x && v[1] === y && v[2] === ox && v[3] === oy && v[4] === p && v[5] === back) continue;
+        v[0] = x; v[1] = y; v[2] = ox; v[3] = oy; v[4] = p; v[5] = back;
+        const b = box[i], [line, dot] = leadG[i].children;
         // o 160 (coluna esquerda) passa pelo vão entre os cards da direita; os outros saem da borda direita do próprio card
-        const gy = (r[1].bottom + r[2].top) / 2;
-        const from = i === 0 ? `${r[0].right},${gy} ${r[1].right},${gy}` : `${r[i].right},${Math.min(Math.max(y, r[i].top + 20), r[i].bottom - 20)}`;
-        const [line, dot] = leadG[i].children, p = state.lines[i].p;
+        const gy = oy + (box[1][3] + box[2][1]) / 2;
+        const from = i === 0 ? `${ox + b[2]},${gy} ${ox + box[1][2]},${gy}` : `${ox + b[2]},${Math.min(Math.max(y, oy + b[1] + 20), oy + b[3] - 20)}`;
         leadG[i].style.visibility = back ? 'hidden' : '';
         line.setAttribute('points', `${from} ${x},${y}`);
         line.style.strokeDashoffset = 1 - p;
         dot.setAttribute('cx', x); dot.setAttribute('cy', y); dot.style.opacity = Math.max(0, (p - 0.85) / 0.15);
-      });
+      }
     }
 
     hero.update(dt, t);
