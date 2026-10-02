@@ -91,7 +91,7 @@ main { overflow-x: clip; } /* a faixa inclinada passa da largura da tela */
   .nav nav, .nav .pill { display: none; }
   .hero { align-items: flex-start; padding-top: 110px; }
   .hero .copy { max-width: 100%; }
-  .section-title { max-width: 100%; }
+  .section-title { max-width: calc(100% - 64px); } /* canto direito livre pra lata pequena */
   .cards { grid-template-columns: 1fr; max-width: none; }
   .card:first-child { grid-row: auto; }
   .flavor-info { right: 16px; bottom: 100px; }
