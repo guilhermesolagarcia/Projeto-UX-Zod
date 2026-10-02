@@ -8,7 +8,15 @@ export function createScene(canvas, { mobile }) {
   renderer.toneMappingExposure = 1.05;
 
   const scene = new THREE.Scene();
-  scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.03).texture;
+  // o mapa de ambiente só existe na GPU: se o contexto WebGL cair, é refeito na volta (senão o metal fica escuro)
+  function makeEnv() {
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    scene.environment?.dispose();
+    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.03).texture;
+    pmrem.dispose();
+  }
+  makeEnv();
+  canvas.addEventListener('webglcontextrestored', makeEnv);
   const camera = new THREE.PerspectiveCamera(28, 1, 0.1, 100);
   camera.position.set(0, 0, 10);
   const key = new THREE.DirectionalLight('#fff', 2.2); key.position.set(4, 5, 5); scene.add(key);
