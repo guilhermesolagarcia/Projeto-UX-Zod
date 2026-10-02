@@ -133,8 +133,8 @@ async function start() {
   }
 
   const cursor = initCursor();
-  const pointer = { x: 0, y: 0 };
-  addEventListener('pointermove', (e) => { pointer.x = (e.clientX / innerWidth) * 2 - 1; pointer.y = (e.clientY / innerHeight) * 2 - 1; });
+  const pointer = { x: 0, y: 0, moved: false }; // sem mexer o mouse o centro da tela não conta como hover
+  addEventListener('pointermove', (e) => { pointer.moved = true; pointer.x = (e.clientX / innerWidth) * 2 - 1; pointer.y = (e.clientY / innerHeight) * 2 - 1; });
 
   // CTA: latas por slot (3 extras + a principal), rótulos-botão e hover por raycast
   const cans = [...extras, hero];
@@ -181,7 +181,8 @@ async function start() {
       ui.labels.forEach((b, k) => { b.textContent = FLAVORS[slotMap[k]].title; });
     }
     let hit = -1;
-    if (inCta && finePointer) {
+    if (!inCta) labelHover = -1; // rótulo focado/hover não fica levantado ao sair do CTA
+    if (inCta && finePointer && pointer.moved) {
       ray.setFromCamera(ndc.set(pointer.x, -pointer.y), s3.camera);
       const first = ray.intersectObjects(targets, true)[0];
       if (first) hit = first.object.userData.slot;
