@@ -29,6 +29,7 @@ body { font-family: var(--font-body); color: var(--ink); -webkit-font-smoothing:
 .btn { margin-top: 28px; padding: 15px 26px; font-size: 16px; transition: transform .2s; }
 .btn:hover { transform: translateY(-2px) scale(1.02); }
 .btn-light { background: var(--creme); color: var(--ink); }
+.nav .pill { color: #fff; }
 [data-section="cta"] .nav { color: var(--creme); }
 [data-section="cta"] .pill { background: var(--creme); color: var(--ink); }
 
