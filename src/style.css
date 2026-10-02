@@ -73,7 +73,7 @@ body { font-family: var(--font-body); color: var(--ink); -webkit-font-smoothing:
 .no-webgl .fallback-can { display: block; position: fixed; right: 6vw; top: 50%; z-index: 1; height: 70vh; width: auto; transform: translateY(-50%); pointer-events: none; }
 
 @media (max-width: 768px) {
-  .nav nav { display: none; }
+  .nav nav, .nav .pill { display: none; }
   .hero { align-items: flex-start; padding-top: 110px; }
   .hero .copy { max-width: 100%; }
   .section-title { max-width: 100%; }

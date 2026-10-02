@@ -6,7 +6,7 @@ gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
 
 export const POSES = {
   desktop: { hero: { x: 0.42, y: -0.08, s: 0.85 }, sabores: { x: 0, y: 0.02, s: 1 }, ingredientes: { x: 0.68, y: 0.35, s: 0.45 }, cta: { x: 0.6, y: -0.15, s: 0.55 } },
-  mobile: { hero: { x: 0.25, y: -0.42, s: 0.6 }, sabores: { x: 0, y: 0.25, s: 0.75 }, ingredientes: { x: 0.6, y: 0.62, s: 0.3 }, cta: { x: 0.6, y: -0.35, s: 0.4 } },
+  mobile: { hero: { x: 0.1, y: -0.42, s: 0.6 }, sabores: { x: 0, y: 0.25, s: 0.75 }, ingredientes: { x: 0.6, y: 0.62, s: 0.3 }, cta: { x: 0.6, y: -0.35, s: 0.4 } },
 };
 
 export function createState(mobile) {
