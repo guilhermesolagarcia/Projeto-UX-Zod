@@ -3,7 +3,7 @@ import { Color, Raycaster, Vector2, Vector3 } from 'three';
 import { gsap } from 'gsap';
 import { BRAND, FLAVORS } from './flavors.js';
 import { flavorState, currentFlavor, presentationSpin, ctaSlots } from './scrollState.js';
-import { loadLabelFonts } from './labels.js';
+import { loadLabelFonts, LACRE } from './labels.js';
 import { createScene } from './scene.js';
 import { createCan, preloadLabels } from './can.js';
 import { createState, initScroll, currentPoses } from './scroll.js';
@@ -17,6 +17,10 @@ const SECTION_BG = { hero: FLAVORS[0].a, ingredientes: '#F4F1EA', cta: '#111111'
 const RIM_A = FLAVORS.map((f) => new Color(f.a)), RIM_B = FLAVORS.map((f) => new Color(f.b)), WHITE = new Color('#fff'), rimMix = new Color();
 
 document.querySelectorAll('[data-brand]').forEach((el) => { el.textContent = BRAND; });
+
+// faixa de sabores separados pelo lacre; cada metade tem o conjunto 2× pra não abrir buraco em tela larga
+const lacre = `<svg viewBox="18 6 64 88"><path fill-rule="evenodd" d="${LACRE}"/></svg>`;
+document.querySelector('.marquee-track').innerHTML = FLAVORS.map((f) => `<span>${f.name}</span>${lacre}`).join('').repeat(4);
 
 const ui = {
   name: document.querySelector('.flavor-name'),

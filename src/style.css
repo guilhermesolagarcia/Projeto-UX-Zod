@@ -39,6 +39,13 @@ body { font-family: var(--font-body); color: var(--ink); -webkit-font-smoothing:
 .section { position: relative; min-height: 100vh; min-height: 100dvh; padding: 120px clamp(16px, 6vw, 96px) 64px; }
 
 .hero { display: flex; align-items: center; }
+
+main { overflow-x: clip; } /* a faixa inclinada passa da largura da tela */
+.marquee { position: relative; width: 110vw; height: 64px; margin-left: -5vw; overflow: hidden; background: var(--ink); color: var(--creme); transform: rotate(-2.5deg); pointer-events: none; }
+.marquee-track { display: flex; align-items: center; width: max-content; height: 100%; font-family: var(--font-display); font-weight: 900; font-size: 28px; letter-spacing: -0.02em; white-space: nowrap; animation: marquee 28s linear infinite; }
+.marquee-track > * { margin-right: 28px; }
+.marquee svg { height: 30px; width: auto; fill: currentColor; }
+@keyframes marquee { to { transform: translateX(-50%); } }
 .hero .copy { max-width: 560px; }
 .hero h1 { font-size: clamp(48px, 8vw, 112px); }
 .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .06em; }
@@ -94,4 +101,5 @@ body { font-family: var(--font-body); color: var(--ink); -webkit-font-smoothing:
 }
 @media (prefers-reduced-motion: reduce) {
   .bg-a, .bg-word, .btn, .nav, .dots button, .can-label { transition: none; }
+  .marquee-track { animation: none; }
 }
