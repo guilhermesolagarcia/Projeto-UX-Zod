@@ -54,7 +54,7 @@ Nomes em inglês. Cada sabor tem **duas cores** e **um rótulo com composição 
 | **Grape Midnight** | `#A57CFF` | `#24135F` | Meia-noite |
 
 ### 3.1 Regras da família (iguais em todas as latas)
-- Faixa preta no topo com `SUA MARCA` em relevo, e faixa preta na base com `ENERGY DRINK · 473 ML`
+- Faixa preta no topo com `ZOD` em relevo, e faixa preta na base com `ENERGY DRINK · 473 ML`
 - Linha `ENERGY DRINK · ZERO SUGAR` acima do nome
 - Primeira palavra do nome gigante e a segunda vazada (só contorno) logo abaixo
 - Lacre presente em todas
