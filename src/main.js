@@ -1,6 +1,6 @@
 import './style.css';
 import { BRAND, FLAVORS } from './flavors.js';
-import { flavorState, currentFlavor } from './scrollState.js';
+import { flavorState, currentFlavor, presentationSpin } from './scrollState.js';
 import { loadLabelFonts } from './labels.js';
 import { createScene } from './scene.js';
 import { createCan } from './can.js';
@@ -106,7 +106,7 @@ async function start() {
     const g = hero.group;
     g.position.set((state.x * w) / 2, (state.y * h) / 2 + state.drop * h + Math.sin(t * 1.1) * 0.06 * idle, 0);
     g.scale.setScalar(state.s);
-    const spin = reduced ? 0 : state.flavorP * Math.PI * 4;
+    const spin = reduced ? 0 : presentationSpin(fs);
     g.rotation.set(0.12 + pointer.y * 0.12 * idle, spin - 0.4 + pointer.x * 0.25 * idle, -0.14);
     hero.setOpen(state.open);
 

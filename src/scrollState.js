@@ -13,3 +13,9 @@ export function flavorState(p, count) {
 export function currentFlavor({ from, to, mix }) {
   return mix >= 0.5 ? to : from;
 }
+
+// ângulo de apresentação: frente (múltiplo de 2π) em cada descanso, 1 volta suave por troca
+export function presentationSpin({ from, mix }) {
+  const eased = 0.5 - Math.cos(Math.PI * mix) / 2; // easeInOutSine
+  return (from + eased) * Math.PI * 2;
+}

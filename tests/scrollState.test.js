@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { flavorState, currentFlavor } from '../src/scrollState.js';
+import { flavorState, currentFlavor, presentationSpin } from '../src/scrollState.js';
 
 test('começo da seção mostra o primeiro sabor parado', () => {
   assert.deepEqual(flavorState(0, 4), { from: 0, to: 1, mix: 0 });
@@ -41,4 +41,19 @@ test('um sabor só nunca troca', () => {
 test('currentFlavor troca na metade da transição', () => {
   assert.equal(currentFlavor({ from: 1, to: 2, mix: 0.49 }), 1);
   assert.equal(currentFlavor({ from: 1, to: 2, mix: 0.5 }), 2);
+});
+
+const TAU = Math.PI * 2;
+const close = (a, b) => assert.ok(Math.abs(a - b) < 1e-9, `${a} != ${b}`);
+
+test('presentationSpin: lata de frente (múltiplo de 2π) em cada descanso', () => {
+  for (let from = 0; from <= 3; from++) close(presentationSpin({ from, mix: 0 }), from * TAU);
+});
+
+test('presentationSpin: contínuo entre o fim de uma troca e o descanso seguinte', () => {
+  for (let k = 0; k < 3; k++) close(presentationSpin({ from: k, mix: 1 }), presentationSpin({ from: k + 1, mix: 0 }));
+});
+
+test('presentationSpin: verso só no meio da troca', () => {
+  for (let from = 0; from < 3; from++) close(presentationSpin({ from, mix: 0.5 }), from * TAU + Math.PI);
 });

@@ -15,14 +15,14 @@ export function createState(mobile) {
 
 export function initScroll({ state, mobile, reducedMotion }) {
   const poses = POSES[mobile ? 'mobile' : 'desktop'];
-  const smoother = reducedMotion ? null : ScrollSmoother.create({ wrapper: '#smooth-wrapper', content: '#smooth-content', smooth: 1.1 });
+  const smoother = reducedMotion ? null : ScrollSmoother.create({ wrapper: '#smooth-wrapper', content: '#smooth-content', smooth: 1.6 });
   const scrollTo = (y) => (smoother ? smoother.scrollTo(y, true) : window.scrollTo({ top: y, behavior: 'auto' }));
 
   for (const id of ['hero', 'sabores', 'ingredientes', 'cta']) {
     ScrollTrigger.create({ trigger: `#${id}`, start: 'top center', end: 'bottom center', onToggle: (self) => { if (self.isActive) state.section = id; } });
   }
 
-  const flavors = ScrollTrigger.create({ trigger: '#sabores', start: 'top top', end: '+=300%', pin: true, onUpdate: (self) => { state.flavorP = self.progress; } });
+  const flavors = ScrollTrigger.create({ trigger: '#sabores', start: 'top top', end: '+=600%', pin: true, onUpdate: (self) => { state.flavorP = self.progress; } });
 
   if (!reducedMotion) {
     // abertura: a lata cai quicando, o título sobe palavra por palavra e o lacre abre
