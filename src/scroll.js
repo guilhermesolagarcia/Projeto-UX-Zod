@@ -49,10 +49,12 @@ export function initScroll({ state, mobile, reducedMotion, onOpen }) {
 
   // links internos (#sabores, #cta…) usam a rolagem suave
   document.querySelectorAll('a[href^="#"]').forEach((a) => a.addEventListener('click', (e) => {
-    const target = document.querySelector(a.getAttribute('href'));
+    const href = a.getAttribute('href');
+    const target = document.querySelector(href);
     if (!target) return;
     e.preventDefault();
-    scrollTo(smoother ? target : target.getBoundingClientRect().top + window.scrollY);
+    if (href === '#sabores') scrollTo(flavors.start);
+    else scrollTo(smoother ? target : target.getBoundingClientRect().top + window.scrollY);
   }));
 
   function goToFlavor(i, count) {
