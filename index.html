@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="pt-BR" data-section="hero">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Energia que tem cor</title>
+  <meta name="description" content="Energético zero açúcar em quatro sabores: Tropical Passion, Watermelon Wave, Lime Volt e Grape Midnight." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,800&family=Unbounded:wght@900&family=Shrikhand&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div id="bg" aria-hidden="true">
+    <div class="bg-a"></div>
+    <div class="bg-b"><svg class="bg-wave" viewBox="0 0 1200 40" preserveAspectRatio="none"><path d="M0 20 Q150 0 300 20 T600 20 T900 20 T1200 20 V40 H0Z" /></svg></div>
+  </div>
+  <canvas id="scene" aria-hidden="true"></canvas>
+  <img class="fallback-can" src="/lata-fallback.png" alt="Lata Tropical Passion" width="600" height="900" />
+
+  <header class="nav">
+    <a class="logo" href="#hero" data-brand>SUA MARCA</a>
+    <nav><a href="#sabores">Sabores</a><a href="#ingredientes">Ingredientes</a></nav>
+    <div class="nav-actions">
+      <button class="sound" type="button" aria-pressed="false">Som: off</button>
+      <a class="pill" href="#cta">Peça o seu</a>
+    </div>
+  </header>
+
+  <div id="smooth-wrapper"><div id="smooth-content"><main>
+    <section id="hero" class="section hero">
+      <div class="copy">
+        <h1 class="display"><span class="w"><span>Energia</span></span> <span class="w"><span>que</span></span> <span class="w"><span>tem</span></span> <span class="w"><span>cor.</span></span></h1>
+        <p class="lead">Quatro sabores, zero açúcar e 160mg de cafeína pra você render o dia inteiro.</p>
+        <a class="btn" href="#sabores">Conheça os sabores →</a>
+      </div>
+    </section>
+
+    <section id="sabores" class="section sabores">
+      <div class="flavor-info" aria-live="polite">
+        <p class="eyebrow">Sabor <span class="flavor-num">1</span>/4</p>
+        <h2 class="display flavor-name">Tropical Passion</h2>
+        <p class="flavor-desc">Manga e maracujá num pôr do sol que cabe na lata.</p>
+      </div>
+      <nav class="dots" aria-label="Escolher sabor">
+        <button type="button" aria-label="Tropical Passion" aria-current="true"></button>
+        <button type="button" aria-label="Watermelon Wave" aria-current="false"></button>
+        <button type="button" aria-label="Lime Volt" aria-current="false"></button>
+        <button type="button" aria-label="Grape Midnight" aria-current="false"></button>
+      </nav>
+    </section>
+
+    <section id="ingredientes" class="section ingredientes">
+      <h2 class="section-title">O que tem dentro</h2>
+      <div class="cards">
+        <article class="card"><p class="display num"><span data-count="160">160</span><small>mg</small></p><h3>Cafeína</h3><p>Energia que chega rápido e não derruba depois.</p></article>
+        <article class="card"><p class="display num"><span data-count="0">0</span><small>g</small></p><h3>Açúcar</h3><p>Doce de fruta de verdade, sem açúcar adicionado.</p></article>
+        <article class="card"><p class="display num">B<span data-count="12">12</span></p><h3>Vitaminas</h3><p>Complexo B pra mente acordada e foco no que importa.</p></article>
+      </div>
+    </section>
+
+    <section id="cta" class="section cta">
+      <h2 class="display">Peça o seu.</h2>
+      <p class="lead">Quatro sabores, uma energia que tem cor.</p>
+      <a class="btn btn-light" href="#hero">Quero experimentar →</a>
+      <footer class="footer"><span data-brand>SUA MARCA</span> · Projeto fictício de portfólio · 2026</footer>
+    </section>
+  </main></div></div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
