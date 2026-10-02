@@ -64,7 +64,9 @@ main { overflow-x: clip; } /* a faixa inclinada passa da largura da tela */
 .flavor-name { margin-top: 10px; font-size: clamp(28px, 3vw, 44px); }
 .flavor-desc { margin-top: 14px; font-size: 18px; line-height: 1.45; }
 .dots { position: absolute; right: clamp(16px, 4vw, 48px); top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 12px; }
-.dots button { width: 14px; height: 14px; padding: 0; border-radius: 50%; border: 2px solid var(--ink); background: transparent; cursor: pointer; transition: transform .2s, background .2s; }
+.dots button { position: relative; width: 14px; height: 14px; padding: 0; border-radius: 50%; border: 2px solid var(--ink); background: transparent; cursor: pointer; transition: transform .2s, background .2s; }
+/* área de toque de 26px sem mudar o desenho: 10px por dentro da borda + 8px de cada lado = o passo entre bolinhas */
+.dots button::before { content: ''; position: absolute; inset: -8px; border-radius: 50%; }
 .dots button[aria-current="true"] { background: var(--ink); transform: scale(1.25); }
 
 .ingredientes { display: flex; flex-direction: column; justify-content: center; }
