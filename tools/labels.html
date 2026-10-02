@@ -1,0 +1,12 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Unbounded:wght@900&family=Shrikhand&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#333;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px}canvas{width:100%;display:block}</style>
+</head><body>
+<script type="module">
+import { loadLabelFonts, drawLabelMaps } from '/src/labels.js';
+await loadLabelFonts();
+for (let i = 0; i < 4; i++) document.body.appendChild(drawLabelMaps(i).color);
+document.title = 'ready';
+</script>
+</body></html>
